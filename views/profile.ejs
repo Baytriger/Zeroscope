@@ -1,0 +1,179 @@
+<%- include('partials/header') %>
+
+<main class="max-w-2xl mx-auto px-4 sm:px-6 py-10" style="position:relative;z-index:1;">
+
+  <div class="mb-8">
+    <h1 style="font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.4rem);font-weight:800;color:var(--text);line-height:1.1;">
+      Your <span style="color:var(--accent);">Profile</span>
+    </h1>
+    <p style="font-size:1rem;color:var(--text-muted);margin-top:6px;">
+      Set your username and profile picture for the Zero Authority DAO community.
+    </p>
+  </div>
+
+  <% if (!walletAddress) { %>
+  <div class="card p-10 text-center fade-in">
+    <div style="font-size:3rem;margin-bottom:16px;">🔌</div>
+    <h2 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:8px;">Connect Your Wallet First</h2>
+    <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:20px;">You need to connect a wallet to set up your profile.</p>
+    <button onclick="openWalletModal()" class="btn-accent">Connect Wallet</button>
+  </div>
+  <% } else { %>
+
+  <div class="card p-6 sm:p-8 fade-in">
+
+    <!-- Avatar Upload Area -->
+    <div class="flex flex-col items-center mb-8">
+      <div id="avatarRing" onclick="document.getElementById('avatarInput').click()" 
+           class="relative cursor-pointer group"
+           style="width:110px;height:110px;">
+        <!-- Circle -->
+        <div id="avatarCircle" class="w-full h-full rounded-full overflow-hidden flex items-center justify-center"
+             style="background:linear-gradient(135deg,var(--accent),var(--purple));border:3px solid var(--border-hover);">
+          <% if (profile && profile.avatar) { %>
+            <img id="avatarImg" src="<%= profile.avatar %>" alt="Avatar" class="w-full h-full object-cover" />
+          <% } else { %>
+            <span id="avatarEmoji" style="font-size:2.8rem;">👤</span>
+          <% } %>
+        </div>
+        <!-- Hover overlay -->
+        <div class="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+             style="background:rgba(0,0,0,0.55);">
+          <div style="text-align:center;">
+            <div style="font-size:1.4rem;">📷</div>
+            <div style="font-size:0.65rem;color:#fff;font-family:'Syne',sans-serif;font-weight:700;margin-top:2px;">CHANGE</div>
+          </div>
+        </div>
+      </div>
+
+      <input type="file" id="avatarInput" accept="image/*" class="hidden" onchange="previewAvatar(event)" />
+      <p style="font-size:0.75rem;color:var(--text-dim);margin-top:10px;font-family:'DM Sans',sans-serif;">
+        Tap the photo to upload from your gallery · Max 2MB
+      </p>
+
+      <!-- Profile name + tier below avatar -->
+      <div style="margin-top:10px;text-align:center;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:var(--text);">
+          <%= (profile && profile.displayName) ? profile.displayName : 'Anonymous' %>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">
+          <%= walletAddress.slice(0,8) %>...<%= walletAddress.slice(-6) %>
+        </div>
+        <% if (profile) { %>
+        <div class="flex items-center justify-center gap-2 mt-2">
+          <span style="font-size:1rem;"><%= profile.tier ? profile.tier.icon : '🌱' %></span>
+          <span style="font-size:0.8rem;font-family:'Syne',sans-serif;font-weight:600;color:var(--accent);"><%= profile.tier ? profile.tier.name : 'Newcomer' %></span>
+          <span style="font-size:0.8rem;color:var(--text-muted);font-weight:700;font-family:'Syne',sans-serif;"><%= profile.reputationScore || 0 %> REP</span>
+        </div>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Username Field -->
+    <div class="flex flex-col gap-5">
+      <div>
+        <label style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.85rem;color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:8px;">Username</label>
+        <input
+          type="text"
+          id="displayName"
+          class="zs-input"
+          placeholder="e.g. CryptoBuilder99"
+          maxlength="32"
+          value="<%= (profile && profile.displayName) ? profile.displayName : '' %>"
+        />
+        <p style="font-size:0.75rem;color:var(--text-dim);margin-top:6px;">Up to 32 characters. Visible to the community.</p>
+      </div>
+
+      <button onclick="saveProfile()" class="btn-accent w-full" style="padding:14px;" id="saveBtn">
+        Save Profile
+      </button>
+
+      <p id="saveMsg" class="text-center hidden" style="font-size:0.85rem;font-family:'Syne',sans-serif;"></p>
+    </div>
+  </div>
+
+  <% if (profile) { %>
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
+    <div class="stat-card text-center">
+      <div class="stat-value" style="font-size:1.5rem;"><%= profile.reputationScore || 0 %></div>
+      <div class="stat-label">Reputation</div>
+    </div>
+    <div class="stat-card text-center">
+      <div class="stat-value" style="font-size:1.5rem;color:#22d3ee;"><%= profile.totalBounties || 0 %></div>
+      <div class="stat-label">Bounties</div>
+    </div>
+    <div class="stat-card text-center">
+      <div class="stat-value" style="font-size:1.5rem;color:#10b981;"><%= profile.totalGrants || 0 %></div>
+      <div class="stat-label">Grants</div>
+    </div>
+    <div class="stat-card text-center">
+      <div class="stat-value" style="font-size:1.5rem;color:#f59e0b;"><%= profile.bookmarkCount || 0 %></div>
+      <div class="stat-label">Bookmarks</div>
+    </div>
+  </div>
+  <% } %>
+
+  <% } %>
+</main>
+
+<script>
+let selectedFile = null;
+
+function previewAvatar(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    showToast('Image too large. Max 2MB.', 'error');
+    return;
+  }
+  selectedFile = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const circle = document.getElementById('avatarCircle');
+    circle.innerHTML = `<img src="${e.target.result}" alt="Avatar" class="w-full h-full object-cover" />`;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveProfile() {
+  const displayName = document.getElementById('displayName').value.trim();
+  const btn = document.getElementById('saveBtn');
+  const msg = document.getElementById('saveMsg');
+
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+  msg.classList.add('hidden');
+
+  const formData = new FormData();
+  formData.append('displayName', displayName);
+  if (selectedFile) formData.append('avatar', selectedFile);
+
+  try {
+    const res = await fetch('/profile/update', {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Profile saved!', 'success');
+      msg.textContent = '✅ Profile updated successfully!';
+      msg.style.color = 'var(--success)';
+      msg.classList.remove('hidden');
+      setTimeout(() => location.reload(), 1200);
+    } else {
+      msg.textContent = data.message || 'Something went wrong.';
+      msg.style.color = 'var(--danger)';
+      msg.classList.remove('hidden');
+    }
+  } catch(err) {
+    msg.textContent = 'Connection error. Please try again.';
+    msg.style.color = 'var(--danger)';
+    msg.classList.remove('hidden');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Save Profile';
+}
+</script>
+
+<%- include('partials/footer') %>

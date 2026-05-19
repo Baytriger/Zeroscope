@@ -1,0 +1,247 @@
+<%- include('partials/header') %>
+
+<main class="max-w-7xl mx-auto px-4 sm:px-6 py-8" style="position:relative;z-index:1;">
+
+  <!-- ── Hero Header ──────────────────────────────────────────────────────── -->
+  <div class="mb-8">
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+      <div>
+        <h1 style="font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.5rem);font-weight:800;color:var(--text);line-height:1.1;">
+          Web3 Opportunities
+          <span style="color:var(--accent);">Hub</span>
+        </h1>
+        <p style="font-size:1rem;color:var(--text-muted);margin-top:6px;">
+          Live bounties, grants, and jobs aggregated from the top Web3 platforms.
+        </p>
+      </div>
+      <% if (typeof walletAddress !== 'undefined' && walletAddress) { %>
+      <div class="stat-card flex items-center gap-3 py-3" style="padding:12px 18px;">
+        <div>
+          <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">Your Reputation</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--accent);" id="reputationDisplay">—</div>
+        </div>
+        <div id="tierDisplay" style="font-size:1.5rem;">🔭</div>
+      </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- ── Analytics Stats Row ──────────────────────────────────────────────── -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
+    <div class="stat-card">
+      <div class="stat-value"><%= analytics.totalOpportunities %></div>
+      <div class="stat-label">Total Live</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:#22d3ee;"><%= analytics.activeBounties %></div>
+      <div class="stat-label">Bounties</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:#10b981;"><%= analytics.activeGrants %></div>
+      <div class="stat-label">Grants</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:#8b5cf6;"><%= analytics.activeJobs %></div>
+      <div class="stat-label">Jobs</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:#f59e0b;"><%= analytics.activeEvents %></div>
+      <div class="stat-label">Events</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="color:var(--hot);"><%= analytics.totalBookmarks %></div>
+      <div class="stat-label">Bookmarked</div>
+    </div>
+  </div>
+
+  <!-- ── Hot Opportunities Section ───────────────────────────────────────── -->
+  <% if (hotOpportunities && hotOpportunities.length > 0) { %>
+  <section class="mb-10">
+    <div class="flex items-center gap-3 mb-4">
+      <h2 style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--text);">🔥 Hot Right Now</h2>
+      <span class="badge badge-hot hot-badge">Trending</span>
+    </div>
+    <div class="flex gap-4 overflow-x-auto pb-3" style="scrollbar-width:thin;">
+      <% hotOpportunities.forEach(function(op, i) { %>
+      <div class="card flex-shrink-0 p-4 fade-in" style="width:280px;animation-delay:<%= i * 80 %>ms;">
+        <div class="flex items-start justify-between mb-3">
+          <span class="badge badge-<%= op.category %>"><%= op.category %></span>
+          <span class="badge badge-hot hot-badge">🔥 Hot</span>
+        </div>
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;color:var(--text);margin-bottom:8px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+          <%= op.title %>
+        </h3>
+        <div class="flex items-center justify-between mt-3">
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--accent);">
+              <%= isNaN(parseFloat(op.reward)) ? op.reward : '$' + parseFloat(op.reward).toLocaleString() %>
+              <span style="font-size:0.7rem;font-weight:600;color:var(--text-muted);"><%= op.rewardToken %></span>
+            </div>
+            <div style="font-size:0.72rem;color:var(--text-muted);">from <%= op.source %></div>
+          </div>
+          <% if (op.deadline) { %>
+          <span data-deadline="<%= op.deadline %>" class="countdown"></span>
+          <% } %>
+        </div>
+        <button
+          onclick="saveBookmark(this, { opportunityId:'<%= op.id %>', title:`<%= op.title.replace(/`/g, '\\`').replace(/'/g,"\\x27") %>`, category:'<%= op.category %>', source:'<%= op.source %>', reward:'<%= op.reward %>', rewardToken:'<%= op.rewardToken %>', deadline:'<%= op.deadline || '' %>', tags:'<%= op.tags.join(',') %>', difficulty:'<%= op.difficulty %>' })"
+          class="w-full mt-3 btn-outline text-sm py-2 flex items-center justify-center gap-2"
+          <%= bookmarkIds.includes(op.id) ? 'disabled style="color:var(--accent);border-color:var(--accent);"' : '' %>>
+          <%= bookmarkIds.includes(op.id) ? '🔖 Saved' : '+ Save' %>
+        </button>
+      </div>
+      <% }) %>
+    </div>
+  </section>
+  <% } %>
+
+  <!-- ── Search & Filter Bar ──────────────────────────────────────────────── -->
+  <div class="flex flex-col sm:flex-row gap-3 mb-6">
+    <form method="GET" action="/" class="flex flex-col sm:flex-row gap-3 w-full" id="filterForm">
+      <!-- Search -->
+      <div class="relative flex-1">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-dim);">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="text" name="search" value="<%= currentSearch %>" placeholder="Search by title, tag, or platform..." class="zs-input" style="padding-left:38px;" oninput="debounceSubmit()" />
+      </div>
+      <!-- Sort -->
+      <select name="sort" class="zs-select" onchange="this.form.submit()">
+        <option value="newest"  <%= currentSort === 'newest'  ? 'selected' : '' %>>Sort: Newest</option>
+        <option value="reward"  <%= currentSort === 'reward'  ? 'selected' : '' %>>Sort: Reward ↓</option>
+        <option value="deadline"<%= currentSort === 'deadline'? 'selected' : '' %>>Sort: Deadline ↑</option>
+        <option value="popular" <%= currentSort === 'popular' ? 'selected' : '' %>>Sort: Popular</option>
+      </select>
+      <!-- Hidden category -->
+      <input type="hidden" name="category" value="<%= currentCategory %>" id="hiddenCategory" />
+    </form>
+  </div>
+
+  <!-- Category Filter Pills -->
+  <div class="flex gap-2 mb-6 overflow-x-auto pb-1" style="scrollbar-width:none;">
+    <% categories.forEach(function(cat) { %>
+    <button
+      class="filter-tab flex-shrink-0 <%= cat === currentCategory ? 'active' : '' %>"
+      onclick="filterByCategory('<%= cat %>')">
+      <%= cat === 'all' ? '⚡ All' : cat === 'bounty' ? '🎯 Bounties' : cat === 'grant' ? '💰 Grants' : cat === 'job' ? '💼 Jobs' : cat === 'event' ? '🎪 Events' : cat %>
+    </button>
+    <% }) %>
+  </div>
+
+  <!-- ── Opportunity Cards Grid ────────────────────────────────────────────── -->
+  <% if (opportunities && opportunities.length > 0) { %>
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4" id="opportunitiesGrid">
+    <% opportunities.forEach(function(op, i) { %>
+    <div class="card p-5 flex flex-col gap-3 fade-in" style="animation-delay:<%= (i % 12) * 50 %>ms;">
+      <!-- Top row -->
+      <div class="flex items-start justify-between gap-2">
+        <div class="flex flex-wrap gap-2">
+          <span class="badge badge-<%= op.category %>">
+            <%= op.category === 'bounty' ? '🎯' : op.category === 'grant' ? '💰' : op.category === 'job' ? '💼' : '🎪' %>
+            <%= op.category %>
+          </span>
+          <% if (op.isHot) { %>
+          <span class="badge badge-hot hot-badge">🔥</span>
+          <% } %>
+          <span class="badge" style="background:var(--bg-card2);color:var(--text-dim);border:1px solid var(--border);font-size:0.65rem;"><%= op.source %></span>
+        </div>
+        <button
+          onclick="saveBookmark(this, { opportunityId:'<%= op.id %>', title:`<%= op.title.replace(/`/g,'\\`').replace(/'/g,"\\x27") %>`, description:`<%= (op.description || '').slice(0,200).replace(/`/g,'\\`').replace(/'/g,"\\x27") %>`, category:'<%= op.category %>', source:'<%= op.source %>', sourceUrl:'<%= op.sourceUrl || '' %>', reward:'<%= op.reward %>', rewardToken:'<%= op.rewardToken %>', deadline:'<%= op.deadline || '' %>', tags:'<%= op.tags.join(',') %>', difficulty:'<%= op.difficulty %>' })"
+          class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-colors hover:bg-[var(--accent-glow)]"
+          style="color:<%= bookmarkIds.includes(op.id) ? 'var(--accent)' : 'var(--text-dim)' %>;border:1px solid var(--border);"
+          title="<%= bookmarkIds.includes(op.id) ? 'Saved' : 'Save bookmark' %>"
+          <%= bookmarkIds.includes(op.id) ? 'disabled' : '' %>>
+          <%= bookmarkIds.includes(op.id) ? '🔖' : '+' %>
+        </button>
+      </div>
+
+      <!-- Title -->
+      <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--text);line-height:1.35;">
+        <%= op.title %>
+      </h3>
+
+      <!-- Description -->
+      <% if (op.description) { %>
+      <p style="font-size:0.875rem;color:var(--text-muted);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+        <%= op.description %>
+      </p>
+      <% } %>
+
+      <!-- Tags -->
+      <% if (op.tags && op.tags.length > 0) { %>
+      <div class="flex flex-wrap gap-1.5">
+        <% op.tags.slice(0,5).forEach(function(tag) { %>
+        <span style="font-size:0.7rem;padding:2px 8px;border-radius:6px;background:var(--bg-card2);color:var(--text-muted);border:1px solid var(--border);">#<%= tag %></span>
+        <% }) %>
+      </div>
+      <% } %>
+
+      <!-- Bottom row -->
+      <div class="flex items-center justify-between pt-2" style="border-top:1px solid var(--border);margin-top:auto;">
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;color:var(--accent);">
+            <%= isNaN(parseFloat(op.reward)) ? op.reward : '$' + parseFloat(op.reward).toLocaleString() %>
+            <span style="font-size:0.7rem;font-weight:600;color:var(--text-muted);"><%= op.rewardToken %></span>
+          </div>
+          <div style="font-size:0.72rem;color:var(--text-dim);">
+            <%= op.applicants || 0 %> applicant<%= op.applicants !== 1 ? 's' : '' %>
+            · <span style="text-transform:capitalize;"><%= op.difficulty %></span>
+          </div>
+        </div>
+        <div class="text-right">
+          <% if (op.deadline) { %>
+          <span data-deadline="<%= op.deadline %>" class="countdown"></span>
+          <% } else { %>
+          <span style="font-size:0.75rem;color:var(--success);font-weight:600;">Open</span>
+          <% } %>
+          <% if (op.sourceUrl) { %>
+          <div>
+            <a href="<%= op.sourceUrl %>" target="_blank" rel="noopener noreferrer" style="font-size:0.72rem;color:var(--accent);font-weight:600;" class="hover:underline">
+              View →
+            </a>
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+
+  <% } else { %>
+  <!-- Empty state -->
+  <div class="text-center py-20">
+    <div style="font-size:4rem;margin-bottom:16px;">🔍</div>
+    <h3 style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;color:var(--text);margin-bottom:8px;">No opportunities found</h3>
+    <p style="color:var(--text-muted);">Try a different search or category filter.</p>
+    <a href="/" class="btn-accent inline-block mt-4">Clear Filters</a>
+  </div>
+  <% } %>
+
+</main>
+
+<script>
+// Category filter
+function filterByCategory(cat) {
+  document.getElementById('hiddenCategory').value = cat;
+  document.getElementById('filterForm').submit();
+}
+
+// Debounce search
+let debounceTimer;
+function debounceSubmit() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => document.getElementById('filterForm').submit(), 600);
+}
+
+// Load user profile if connected
+<% if (typeof walletAddress !== 'undefined' && walletAddress) { %>
+fetch('/wallet/profile').then(r => r.json()).then(data => {
+  if (data.success) {
+    document.getElementById('reputationDisplay').textContent = data.profile.reputationScore + ' XP';
+    document.getElementById('tierDisplay').textContent = data.profile.tier.icon;
+  }
+}).catch(() => {});
+<% } %>
+</script>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title || 'ZEROSCOPE' %></title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Professional Fonts: Syne (headings) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: ['attribute', '[data-theme="dark"]'],
+      theme: {
+        extend: {
+          fontFamily: {
+            heading: ['Syne', 'sans-serif'],
+            body: ['DM Sans', 'sans-serif'],
+          },
+          colors: {
+            cyan: { 400: '#22d3ee', 500: '#06b6d4' },
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* ── CSS Custom Properties ───────────────────────────────────────────── */
+    :root {
+      --bg:           #0a0f1e;
+      --bg-card:      #0f1629;
+      --bg-card2:     #141d35;
+      --border:       rgba(34, 211, 238, 0.15);
+      --border-hover: rgba(34, 211, 238, 0.4);
+      --text:         #e2e8f0;
+      --text-muted:   #94a3b8;
+      --text-dim:     #64748b;
+      --accent:       #22d3ee;
+      --accent-glow:  rgba(34, 211, 238, 0.25);
+      --accent2:      #0ea5e9;
+      --hot:          #f59e0b;
+      --success:      #10b981;
+      --danger:       #ef4444;
+      --warning:      #f59e0b;
+      --purple:       #8b5cf6;
+    }
+    [data-theme="light"] {
+      --bg:           #f0f4ff;
+      --bg-card:      #ffffff;
+      --bg-card2:     #f8faff;
+      --border:       rgba(6, 182, 212, 0.2);
+      --border-hover: rgba(6, 182, 212, 0.5);
+      --text:         #0f172a;
+      --text-muted:   #475569;
+      --text-dim:     #94a3b8;
+      --accent:       #0891b2;
+      --accent-glow:  rgba(8, 145, 178, 0.15);
+      --accent2:      #0369a1;
+      --hot:          #d97706;
+      --success:      #059669;
+      --danger:       #dc2626;
+      --warning:      #d97706;
+      --purple:       #7c3aed;
+    }
+
+    /* ── Base ────────────────────────────────────────────────────────────── */
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+      transition: background 0.3s, color 0.3s;
+    }
+    h1,h2,h3,h4,h5,h6 { font-family: 'Syne', sans-serif; }
+
+    /* ── Background Pattern ──────────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(34,211,238,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(139,92,246,0.06) 0%, transparent 60%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    [data-theme="light"] body::before {
+      background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(8,145,178,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(124,58,237,0.04) 0%, transparent 60%);
+    }
+
+    /* ── Cards ───────────────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 32px var(--accent-glow);
+    }
+
+    /* ── Navbar ──────────────────────────────────────────────────────────── */
+    .navbar {
+      background: rgba(10, 15, 30, 0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    [data-theme="light"] .navbar {
+      background: rgba(240, 244, 255, 0.9);
+    }
+
+    /* ── Buttons ─────────────────────────────────────────────────────────── */
+    .btn-accent {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      font-size: 0.9rem;
+    }
+    .btn-accent:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-hover);
+      color: var(--accent);
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      border-radius: 10px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 0.9rem;
+    }
+    .btn-outline:hover { background: var(--accent-glow); }
+
+    /* ── Badges / Pills ──────────────────────────────────────────────────── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      font-family: 'Syne', sans-serif;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+    .badge-bounty  { background: rgba(34,211,238,0.12); color: #22d3ee; border: 1px solid rgba(34,211,238,0.3); }
+    .badge-grant   { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-job     { background: rgba(139,92,246,0.12); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.3); }
+    .badge-event   { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
+    .badge-hot     { background: rgba(239,68,68,0.12);  color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+
+    /* ── Category Filter Tabs ────────────────────────────────────────────── */
+    .filter-tab {
+      padding: 8px 18px;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      background: transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .filter-tab:hover, .filter-tab.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-glow);
+    }
+
+    /* ── Stat Cards ──────────────────────────────────────────────────────── */
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: var(--border-hover); }
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 4px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* ── Countdown ───────────────────────────────────────────────────────── */
+    .countdown { font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 700; }
+    .countdown.urgent { color: var(--danger); animation: pulse 1.5s infinite; }
+    .countdown.warning { color: var(--warning); }
+    .countdown.ok { color: var(--success); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+    /* ── Hot glow ────────────────────────────────────────────────────────── */
+    .hot-badge {
+      animation: hotpulse 2s infinite;
+    }
+    @keyframes hotpulse { 0%,100%{box-shadow:0 0 0 rgba(239,68,68,0)} 50%{box-shadow:0 0 12px rgba(239,68,68,0.5)} }
+
+    /* ── Notification Panel ──────────────────────────────────────────────── */
+    .notif-panel {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      width: 360px;
+      max-width: calc(100vw - 32px);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      z-index: 200;
+      overflow: hidden;
+    }
+
+    /* ── AI Chat ─────────────────────────────────────────────────────────── */
+    .chat-bubble-user { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-radius: 16px 16px 4px 16px; }
+    .chat-bubble-ai   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 16px 16px 16px 4px; }
+
+    /* ── Input ───────────────────────────────────────────────────────────── */
+    .zs-input {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      padding: 10px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .zs-input:focus { border-color: var(--accent); }
+    .zs-input::placeholder { color: var(--text-dim); }
+
+    /* ── Select ──────────────────────────────────────────────────────────── */
+    .zs-select {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      padding: 10px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      cursor: pointer;
+    }
+    .zs-select:focus { border-color: var(--accent); }
+
+    /* ── Scrollbar ───────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
+
+    /* ── Wallet Button ───────────────────────────────────────────────────── */
+    .wallet-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .wallet-btn.connected {
+      background: rgba(16,185,129,0.12);
+      border: 1px solid rgba(16,185,129,0.3);
+      color: #10b981;
+    }
+    .wallet-btn.disconnected {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      color: #fff;
+    }
+
+    /* ── Mobile responsive helpers ───────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .stat-value { font-size: 1.5rem; }
+      .notif-panel { width: calc(100vw - 24px); right: -12px; }
+    }
+
+    /* ── Fade in animation ───────────────────────────────────────────────── */
+    .fade-in { animation: fadeIn 0.4s ease both; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: none; } }
+  </style>
+</head>
+<body>
+
+<!-- ═══ NAVBAR ═══════════════════════════════════════════════════════════════ -->
+<nav class="navbar">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6">
+    <div class="flex items-center justify-between h-16">
+
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-3 flex-shrink-0">
+        <img src="/logo.jpg" alt="ZEROSCOPE" class="h-9 w-9 rounded-lg object-cover" />
+        <span style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--accent);letter-spacing:-0.02em;">
+          ZEROSCOPE
+        </span>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <div class="hidden md:flex items-center gap-1">
+        <a href="/" class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors <%= currentPath === '/' ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] hover:text-[var(--text)]' %>" style="font-family:'Syne',sans-serif;">Opportunities</a>
+        <a href="/bookmarks" class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors <%= currentPath === '/bookmarks' ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] hover:text-[var(--text)]' %>" style="font-family:'Syne',sans-serif;">Bookmarks</a>
+        <a href="/profile" class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors <%= currentPath === '/profile' ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] hover:text-[var(--text)]' %>" style="font-family:'Syne',sans-serif;">Profile</a>
+      </div>
+
+      <!-- Right actions -->
+      <div class="flex items-center gap-2 sm:gap-3">
+
+        <!-- X (Twitter) Social -->
+        <a href="https://x.com/ZeroScopeHQ" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--accent-glow)]" style="border:1px solid var(--border);color:var(--text-muted);" title="Follow @ZeroScopeHQ on X" aria-label="X / Twitter">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.763l7.659-8.741L1.928 2.25h6.927l4.346 5.739zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        </a>
+
+        <!-- Theme Toggle -->
+        <button onclick="toggleTheme()" class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--accent-glow)]" style="border:1px solid var(--border);color:var(--text-muted);" title="Toggle theme" aria-label="Toggle theme">
+          <span id="themeIcon">🌙</span>
+        </button>
+
+        <!-- Notifications -->
+        <div class="relative" id="notifWrapper">
+          <button onclick="toggleNotifications()" class="w-9 h-9 rounded-lg flex items-center justify-center relative transition-colors hover:bg-[var(--accent-glow)]" style="border:1px solid var(--border);color:var(--text-muted);" aria-label="Notifications">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <% if (typeof unreadCount !== 'undefined' && unreadCount > 0) { %>
+            <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full text-white text-xs flex items-center justify-center font-bold" style="background:var(--danger);font-family:'Syne',sans-serif;font-size:0.6rem;">
+              <%= unreadCount > 9 ? '9+' : unreadCount %>
+            </span>
+            <% } %>
+          </button>
+
+          <!-- Notification Panel -->
+          <div id="notifPanel" class="notif-panel hidden">
+            <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--border);">
+              <span style="font-family:'Syne',sans-serif;font-weight:700;color:var(--text);">Notifications</span>
+              <button onclick="markAllRead()" class="text-xs font-semibold" style="color:var(--accent);font-family:'Syne',sans-serif;">Mark all read</button>
+            </div>
+            <div class="overflow-y-auto" style="max-height:360px;">
+              <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
+                <% notifications.slice(0,10).forEach(function(n) { %>
+                <div class="flex gap-3 px-4 py-3 cursor-pointer transition-colors hover:bg-[var(--bg-card2)] <%= !n.read ? 'border-l-2' : '' %>" style="<%= !n.read ? 'border-left-color:var(--accent)' : '' %>;border-bottom:1px solid var(--border);" onclick="readNotif('<%= n._id %>')">
+                  <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-base" style="background:var(--bg-card2);">
+                    <%= n.type === 'deadline_critical' ? '🚨' : n.type === 'deadline_warning' ? '⏰' : n.type === 'won' ? '🏆' : n.type === 'new_grant' ? '💰' : n.type === 'new_job' ? '💼' : '🆕' %>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.8rem;color:var(--text);" class="truncate"><%= n.title %></p>
+                    <p style="font-size:0.75rem;color:var(--text-muted);" class="mt-0.5 line-clamp-2"><%= n.message %></p>
+                    <p style="font-size:0.7rem;color:var(--text-dim);" class="mt-1"><%= new Date(n.createdAt).toLocaleDateString() %></p>
+                  </div>
+                </div>
+                <% }) %>
+              <% } else { %>
+              <div class="px-4 py-10 text-center" style="color:var(--text-muted);">
+                <div class="text-3xl mb-2">🔔</div>
+                <p style="font-family:'Syne',sans-serif;font-size:0.85rem;">No notifications yet</p>
+              </div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wallet -->
+        <div id="walletWrapper">
+          <% if (typeof walletAddress !== 'undefined' && walletAddress) { %>
+          <div class="wallet-btn connected" onclick="showWalletMenu()">
+            <span>🟢</span>
+            <span class="hidden sm:inline"><%= walletAddress.slice(0,6) %>...<%= walletAddress.slice(-4) %></span>
+          </div>
+          <% } else { %>
+          <button onclick="openWalletModal()" class="wallet-btn disconnected">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 12h2"/></svg>
+            <span class="hidden sm:inline">Connect</span>
+          </button>
+          <% } %>
+        </div>
+
+        <!-- Mobile menu toggle -->
+        <button class="md:hidden w-9 h-9 rounded-lg flex items-center justify-center" style="border:1px solid var(--border);color:var(--text-muted);" onclick="toggleMobileMenu()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="md:hidden hidden pb-3 pt-1" style="border-top:1px solid var(--border);">
+      <div class="flex flex-col gap-1 mt-2">
+        <a href="/" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Syne',sans-serif;color:var(--text-muted);">🏠 Opportunities</a>
+        <a href="/bookmarks" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Syne',sans-serif;color:var(--text-muted);">🔖 Bookmarks</a>
+        <a href="/profile" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Syne',sans-serif;color:var(--text-muted);">👤 Profile</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Wallet Modal -->
+<div id="walletModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4" style="background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);">
+  <div class="card p-6 w-full max-w-sm fade-in">
+    <div class="flex items-center justify-between mb-6">
+      <h2 style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--text);">Connect Wallet</h2>
+      <button onclick="closeWalletModal()" style="color:var(--text-muted);">✕</button>
+    </div>
+    <div class="flex flex-col gap-3">
+      <button onclick="connectMetaMask()" class="flex items-center gap-4 p-4 rounded-xl transition-colors" style="border:1px solid var(--border);background:var(--bg-card2);color:var(--text);" onmouseover="this.style.borderColor='var(--border-hover)'" onmouseout="this.style.borderColor='var(--border)'">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg" alt="MetaMask" class="w-10 h-10" />
+        <div class="text-left">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;">MetaMask</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);">Browser extension wallet</div>
+        </div>
+      </button>
+      <button onclick="connectPhantom()" class="flex items-center gap-4 p-4 rounded-xl transition-colors" style="border:1px solid var(--border);background:var(--bg-card2);color:var(--text);" onmouseover="this.style.borderColor='var(--border-hover)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div class="w-10 h-10 rounded-full flex items-center justify-center text-2xl" style="background:linear-gradient(135deg,#9945FF,#14F195);">👻</div>
+        <div class="text-left">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;">Phantom</div>
+          <div style="font-size:0.8rem;color:var(--text-muted);">Solana & multi-chain wallet</div>
+        </div>
+      </button>
+
+    </div>
+    <p id="walletError" class="mt-4 text-sm hidden" style="color:var(--danger);font-family:'Syne',sans-serif;"></p>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2" style="max-width:320px;"></div>
