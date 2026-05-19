@@ -1,18 +1,11 @@
 const axios = require('axios');
 
-// ──────────────────────────────────────────────────────────────────────────────
-// ZEROSCOPE Multi-Source Data Aggregation Service
-// Pulls bounties, grants, and jobs from multiple Web3 platforms
-// ──────────────────────────────────────────────────────────────────────────────
-
 const SOURCES = {
-  ZERO_AUTHORITY: process.env.ZERO_AUTHORITY_API || 'https://api.zeroauthority.xyz',
-  DEWORK: 'https://api.dework.xyz/graphql',
-  LAYER3: 'https://layer3.xyz',
+  ZERO_AUTHORITY_API: process.env.ZERO_AUTHORITY_API || 'https://api.zeroauthoritydao.com',
+  ZERO_AUTHORITY_WEB: 'https://zeroauthoritydao.com',
   GITCOIN: 'https://gitcoin.co/api/v1',
 };
 
-// ─── Helper: normalise any opportunity into a standard shape ──────────────────
 function normalise(raw, source, category = 'bounty') {
   return {
     id: String(raw.id || raw._id || raw.uuid || Math.random().toString(36).slice(2)),
@@ -33,31 +26,23 @@ function normalise(raw, source, category = 'bounty') {
   };
 }
 
-// ─── Zero Authority DAO ───────────────────────────────────────────────────────
 async function fetchZeroAuthority() {
   try {
-    const BASE = SOURCES.ZERO_AUTHORITY;
+    const BASE = SOURCES.ZERO_AUTHORITY_API;
     const [bountiesRes, grantsRes, eventsRes] = await Promise.allSettled([
       axios.get(`${BASE}/bounties`, { timeout: 8000 }),
       axios.get(`${BASE}/grants`,   { timeout: 8000 }),
       axios.get(`${BASE}/events`,   { timeout: 8000 }),
     ]);
-
     const bounties = bountiesRes.status === 'fulfilled'
       ? (bountiesRes.value.data?.bounties || bountiesRes.value.data?.data || bountiesRes.value.data || [])
-          .map(b => normalise(b, 'Zero Authority DAO', 'bounty'))
-      : [];
-
+          .map(b => normalise(b, 'Zero Authority DAO', 'bounty')) : [];
     const grants = grantsRes.status === 'fulfilled'
       ? (grantsRes.value.data?.grants || grantsRes.value.data?.data || grantsRes.value.data || [])
-          .map(g => normalise(g, 'Zero Authority DAO', 'grant'))
-      : [];
-
+          .map(g => normalise(g, 'Zero Authority DAO', 'grant')) : [];
     const events = eventsRes.status === 'fulfilled'
       ? (eventsRes.value.data?.events || eventsRes.value.data?.data || eventsRes.value.data || [])
-          .map(e => normalise(e, 'Zero Authority DAO', 'event'))
-      : [];
-
+          .map(e => normalise(e, 'Zero Authority DAO', 'event')) : [];
     return [...bounties, ...grants, ...events];
   } catch (err) {
     console.warn('⚠️  Zero Authority fetch failed:', err.message);
@@ -65,7 +50,6 @@ async function fetchZeroAuthority() {
   }
 }
 
-// ─── Gitcoin Grants ───────────────────────────────────────────────────────────
 async function fetchGitcoinGrants() {
   try {
     const res = await axios.get(`${SOURCES.GITCOIN}/grants/`, {
@@ -74,14 +58,10 @@ async function fetchGitcoinGrants() {
     });
     const items = res.data?.grants || res.data?.objects || [];
     return items.map(g => normalise({
-      id: g.id,
-      title: g.title,
-      description: g.description,
+      id: g.id, title: g.title, description: g.description,
       url: g.url || `https://gitcoin.co/grants/${g.id}`,
       reward: g.amount_received_in_round ? `$${Number(g.amount_received_in_round).toFixed(0)}` : 'Open',
-      rewardToken: 'USD',
-      tags: g.tags || [],
-      deadline: g.last_update,
+      rewardToken: 'USD', tags: g.tags || [], deadline: g.last_update,
     }, 'Gitcoin', 'grant'));
   } catch (err) {
     console.warn('⚠️  Gitcoin fetch failed:', err.message);
@@ -89,87 +69,187 @@ async function fetchGitcoinGrants() {
   }
 }
 
-// ─── Dework Bounties (GraphQL) ────────────────────────────────────────────────
-async function fetchDeworkBounties() {
-  const query = `
-    query { 
-      tasks(filter: { statuses: [TODO], rewardNotNull: true }, limit: 20) {
-        id title description dueDate
-        reward { amount currency { symbol } }
-        tags { label }
-        assigneeCount
-      }
-    }
-  `;
-  try {
-    const res = await axios.post(SOURCES.DEWORK, { query }, {
-      headers: { 'Content-Type': 'application/json' },
-      timeout: 8000,
-    });
-    const tasks = res.data?.data?.tasks || [];
-    return tasks.map(t => normalise({
-      id: t.id,
-      title: t.title,
-      description: t.description,
-      url: `https://app.dework.xyz/`,
-      reward: t.reward?.amount || 'TBD',
-      rewardToken: t.reward?.currency?.symbol || 'USD',
-      tags: t.tags?.map(tag => tag.label) || [],
-      deadline: t.dueDate,
-    }, 'Dework', 'bounty'));
-  } catch (err) {
-    console.warn('⚠️  Dework fetch failed:', err.message);
-    return [];
-  }
-}
-
-// ─── Mock fallback data so the dashboard always has content ───────────────────
 function getMockData() {
   const now = new Date();
   const makeDeadline = (days) => new Date(now.getTime() + days * 86400000).toISOString();
 
   return [
-    // HOT BOUNTIES
-    { id: 'mock-b1', title: 'Build a Zero Authority DAO Analytics Dashboard', description: 'Create a comprehensive analytics dashboard showcasing DAO activity, contributor stats, and treasury metrics using the Zero Authority API.', category: 'bounty', source: 'Zero Authority DAO', sourceUrl: 'https://zeroauthority.xyz', reward: '2500', rewardToken: 'USDC', deadline: makeDeadline(3), tags: ['React', 'Analytics', 'Web3'], difficulty: 'advanced', applicants: 12, isHot: true, createdAt: new Date().toISOString(), raw: {} },
-    { id: 'mock-b2', title: 'Smart Contract Security Audit — ZeroVault Protocol', description: 'Perform a full security audit of the ZeroVault lending protocol contracts. Identify vulnerabilities, write a comprehensive report, and suggest remediations.', category: 'bounty', source: 'Zero Authority DAO', sourceUrl: 'https://zeroauthority.xyz', reward: '5000', rewardToken: 'USDC', deadline: makeDeadline(7), tags: ['Solidity', 'Security', 'Audit'], difficulty: 'expert', applicants: 5, isHot: true, createdAt: new Date().toISOString(), raw: {} },
-    { id: 'mock-b3', title: 'Design Zero Authority Brand Identity System', description: 'Create a comprehensive brand identity system including logo variations, color palette, typography guidelines, and component library documentation.', category: 'bounty', source: 'Zero Authority DAO', sourceUrl: 'https://zeroauthority.xyz', reward: '1800', rewardToken: 'USDC', deadline: makeDeadline(14), tags: ['Design', 'Branding', 'Figma'], difficulty: 'intermediate', applicants: 23, isHot: false, createdAt: new Date().toISOString(), raw: {} },
-    { id: 'mock-b4', title: 'Write Technical Documentation for ZeroSwap', description: 'Produce developer-facing documentation, API references, and integration guides for the ZeroSwap DEX aggregator.', category: 'bounty', source: 'Zero Authority DAO', sourceUrl: 'https://zeroauthority.xyz', reward: '800', rewardToken: 'USDC', deadline: makeDeadline(10), tags: ['Writing', 'Documentation', 'DeFi'], difficulty: 'beginner', applicants: 31, isHot: false, createdAt: new Date().toISOString(), raw: {} },
-    { id: 'mock-b5', title: 'Develop Mobile Wallet Integration SDK', description: 'Build a cross-platform mobile SDK (React Native) for integrating Zero Authority DAO governance directly from mobile wallets.', category: 'bounty', source: 'Zero Authority DAO', sourceUrl: 'https://zeroauthority.xyz', reward: '6000', rewardToken: 'USDC', deadline: makeDeadline(21), tags: ['React Native', 'Mobile', 'SDK'], difficulty: 'expert', applicants: 8, isHot: true, createdAt: new Date().toISOString(), raw: {} },
+    // ── REAL LIVE BOUNTIES from zeroauthoritydao.com/bounty ──
+    {
+      id: 'za-b1', title: 'ZA x 3HUNNA CLIPPING BOUNTY',
+      description: 'Create clips and highlight content for 3HUNNA on the Stacks Network. Multiple winners selected. Marketing focused bounty open to content creators.',
+      category: 'bounty', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/bounty',
+      reward: 'TBD', rewardToken: 'STX',
+      deadline: makeDeadline(7), tags: ['Marketing', 'Content', 'Clipping', 'Stacks'],
+      difficulty: 'beginner', applicants: 18, isHot: true, createdAt: new Date().toISOString(), raw: {}
+    },
+    {
+      id: 'za-b2', title: 'USDA Alpha Arena',
+      description: 'Participate in the USDA Alpha Arena bounty on the Stacks Network. Multiple winners. General category bounty posted by DIKO Creators.',
+      category: 'bounty', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/bounty',
+      reward: 'TBD', rewardToken: 'USDA',
+      deadline: makeDeadline(14), tags: ['DeFi', 'USDA', 'Stacks', 'General'],
+      difficulty: 'intermediate', applicants: 24, isHot: true, createdAt: new Date().toISOString(), raw: {}
+    },
+    {
+      id: 'za-b3', title: 'THE $FLAT FRENZY BOUNTY',
+      description: 'Join the $FLAT Frenzy bounty on Stacks Network. Multiple winners. General category — show your creativity and passion for the Flat Earth project.',
+      category: 'bounty', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/bounty',
+      reward: 'TBD', rewardToken: 'FLAT',
+      deadline: makeDeadline(4), tags: ['General', 'Stacks', 'Community'],
+      difficulty: 'beginner', applicants: 31, isHot: true, createdAt: new Date().toISOString(), raw: {}
+    },
+    {
+      id: 'za-b4', title: 'The Top Dawg Award',
+      description: 'Single winner bounty by Dawgcoin on the Stacks Network. Prove you are the top dawg in this general category competition.',
+      category: 'bounty', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/bounty',
+      reward: 'TBD', rewardToken: 'DAWG',
+      deadline: makeDeadline(13), tags: ['General', 'Stacks', 'Single Winner'],
+      difficulty: 'beginner', applicants: 9, isHot: false, createdAt: new Date().toISOString(), raw: {}
+    },
+    {
+      id: 'za-b5', title: "Ruffs-to-Riches — Part Two",
+      description: "Multiple winners bounty by Dawgcoin. Continue the Ruffs-to-Riches story on Stacks. Show your content creation skills.",
+      category: 'bounty', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/bounty',
+      reward: 'TBD', rewardToken: 'DAWG',
+      deadline: makeDeadline(18), tags: ['Content', 'General', 'Stacks'],
+      difficulty: 'beginner', applicants: 14, isHot: false, createdAt: new Date().toISOString(), raw: {}
+    },
+    {
+      id: 'za-b6', title: 'Megapont Lets Go Ape',
+      description: 'Single winner meme bounty by Creators Campaign. Create the best meme for the Megapont community on Stacks.',
+      category: 'bounty', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/bounty',
+      reward: 'TBD', rewardToken: 'STX',
+      deadline: makeDeadline(4), tags: ['Meme', 'NFT', 'Stacks', 'Single Winner'],
+      difficulty: 'beginner', applicants: 22, isHot: true, createdAt: new Date().toISOString(), raw: {}
+    },
+    {
+      id: 'za-b7', title: "Ruffs-to-Riches — Part One",
+      description: "Multiple winners bounty by Dawgcoin. Kick off the Ruffs-to-Riches series on Stacks Network with your best content.",
+      category: 'bounty', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/bounty',
+      reward: 'TBD', rewardToken: 'DAWG',
+      deadline: makeDeadline(13), tags: ['Content', 'General', 'Stacks'],
+      difficulty: 'beginner', applicants: 19, isHot: false, createdAt: new Date().toISOString(), raw: {}
+    },
 
-    // GRANTS
-    { id: 'mock-g1', title: 'ZeroGrants: Open Source Tooling Round Q2 2025', description: 'Funding available for open-source tools that improve the Web3 developer experience. Applications open for teams building on Zero Authority infrastructure.', category: 'grant', source: 'Zero Authority DAO', sourceUrl: 'https://zeroauthority.xyz/grants', reward: '25000', rewardToken: 'USDC', deadline: makeDeadline(30), tags: ['Open Source', 'Infrastructure', 'Developer Tools'], difficulty: 'intermediate', applicants: 44, isHot: true, createdAt: new Date().toISOString(), raw: {} },
-    { id: 'mock-g2', title: 'Gitcoin Climate Solutions Grant', description: 'Funding for Web3 projects addressing climate change through decentralized coordination, carbon credits, and sustainability infrastructure.', category: 'grant', source: 'Gitcoin', sourceUrl: 'https://gitcoin.co', reward: '10000', rewardToken: 'GTC', deadline: makeDeadline(45), tags: ['Climate', 'Impact', 'DeSci'], difficulty: 'intermediate', applicants: 67, isHot: false, createdAt: new Date().toISOString(), raw: {} },
-    { id: 'mock-g3', title: 'Web3 Africa Ecosystem Grant — Layer 1 & 2 Research', description: 'Grants for African developers and researchers contributing to blockchain infrastructure research. Priority given to scalability and accessibility work.', category: 'grant', source: 'Web3 Foundation', sourceUrl: 'https://web3.foundation', reward: '15000', rewardToken: 'DOT', deadline: makeDeadline(60), tags: ['Research', 'Africa', 'Infrastructure'], difficulty: 'advanced', applicants: 19, isHot: false, createdAt: new Date().toISOString(), raw: {} },
+    // ── REAL DEGRANTS from zeroauthoritydao.com/funding/degrants ──
+    {
+      id: 'za-g1', title: 'DeGrants — Developers & Builders Track',
+      description: 'Build tools, apps, and infrastructure that make Stacks better for everyone. Submit your proposal to receive funding through the Zero Authority DeGrants program.',
+      category: 'grant', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/funding/degrants',
+      reward: 'Varies', rewardToken: 'STX',
+      deadline: null, tags: ['Development', 'Infrastructure', 'Stacks', 'Open Source'],
+      difficulty: 'intermediate', applicants: 44, isHot: true, createdAt: new Date().toISOString(), raw: {}
+    },
+    {
+      id: 'za-g2', title: 'DeGrants — DeFi Track',
+      description: 'Create financial products and services that give people more control over their money on the Stacks Network. Apply for DeGrants funding.',
+      category: 'grant', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/funding/projects?track=defi',
+      reward: 'Varies', rewardToken: 'STX',
+      deadline: null, tags: ['DeFi', 'Finance', 'Stacks', 'Bitcoin'],
+      difficulty: 'advanced', applicants: 28, isHot: false, createdAt: new Date().toISOString(), raw: {}
+    },
+    {
+      id: 'za-g3', title: 'DeGrants — NFTs Track',
+      description: 'Launch digital art, collectibles, and creative projects that connect communities on Stacks. Apply for DeGrants NFT track funding.',
+      category: 'grant', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/funding/projects?track=nfts',
+      reward: 'Varies', rewardToken: 'STX',
+      deadline: null, tags: ['NFT', 'Art', 'Creative', 'Stacks'],
+      difficulty: 'intermediate', applicants: 36, isHot: false, createdAt: new Date().toISOString(), raw: {}
+    },
+    {
+      id: 'za-g4', title: 'DeGrants — Community & Governance Track',
+      description: 'Start initiatives that grow the Stacks community and improve how decisions get made. Community builders and governance contributors welcome.',
+      category: 'grant', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/funding/projects?track=community-and-governance',
+      reward: 'Varies', rewardToken: 'STX',
+      deadline: null, tags: ['Community', 'Governance', 'DAO', 'Stacks'],
+      difficulty: 'beginner', applicants: 21, isHot: false, createdAt: new Date().toISOString(), raw: {}
+    },
+    {
+      id: 'za-g5', title: 'DeGrants — BNS Track',
+      description: 'Develop naming services and identity solutions that make Web3 easier to use on the Bitcoin Name System.',
+      category: 'grant', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/funding/projects?track=bns',
+      reward: 'Varies', rewardToken: 'STX',
+      deadline: null, tags: ['BNS', 'Identity', 'Bitcoin', 'Stacks'],
+      difficulty: 'advanced', applicants: 12, isHot: false, createdAt: new Date().toISOString(), raw: {}
+    },
 
-    // JOBS
-    { id: 'mock-j1', title: 'Senior Solidity Engineer — Zero Authority Core Team', description: 'Join the Zero Authority DAO core engineering team. You\'ll architect and build the next generation of governance contracts, cross-chain bridges, and protocol upgrades.', category: 'job', source: 'Zero Authority DAO', sourceUrl: 'https://zeroauthority.xyz/jobs', reward: '150000–200000', rewardToken: 'USD/year', deadline: null, tags: ['Solidity', 'EVM', 'Protocol', 'Full-time'], difficulty: 'expert', applicants: 14, isHot: true, createdAt: new Date().toISOString(), raw: {} },
-    { id: 'mock-j2', title: 'Web3 Product Designer (Remote)', description: 'Design intuitive, accessible interfaces for decentralized applications. Work closely with engineering and community to shape the future of DAO tooling.', category: 'job', source: 'Dework', sourceUrl: 'https://dework.xyz', reward: '80000–120000', rewardToken: 'USD/year', deadline: makeDeadline(30), tags: ['Design', 'UX', 'Remote', 'Full-time'], difficulty: 'intermediate', applicants: 56, isHot: false, createdAt: new Date().toISOString(), raw: {} },
-    { id: 'mock-j3', title: 'DevRel & Community Growth Lead', description: 'Drive developer adoption, create content, run workshops, and grow the Zero Authority developer community globally. Strong communicator with Web3 passion needed.', category: 'job', source: 'Zero Authority DAO', sourceUrl: 'https://zeroauthority.xyz/jobs', reward: '90000–130000', rewardToken: 'USD/year', deadline: null, tags: ['DevRel', 'Community', 'Marketing', 'Remote'], difficulty: 'intermediate', applicants: 38, isHot: false, createdAt: new Date().toISOString(), raw: {} },
+    // ── JOBS ──
+    {
+      id: 'za-j1', title: 'Web3 Creator / Content Producer',
+      description: 'Zero Authority DAO is looking for skilled content creators to produce clips, articles, and community content across the Stacks ecosystem.',
+      category: 'job', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/creators',
+      reward: 'TBD', rewardToken: 'STX',
+      deadline: null, tags: ['Content', 'Marketing', 'Remote', 'Web3'],
+      difficulty: 'beginner', applicants: 40, isHot: true, createdAt: new Date().toISOString(), raw: {}
+    },
+    {
+      id: 'za-j2', title: 'Stacks Smart Contract Developer',
+      description: 'Build Clarity smart contracts for Zero Authority DAO protocols. Experience with Stacks and Bitcoin L2 required.',
+      category: 'job', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/creators',
+      reward: 'TBD', rewardToken: 'STX',
+      deadline: null, tags: ['Clarity', 'Stacks', 'Smart Contracts', 'Bitcoin'],
+      difficulty: 'expert', applicants: 8, isHot: true, createdAt: new Date().toISOString(), raw: {}
+    },
 
-    // EVENTS
-    { id: 'mock-e1', title: 'ETHGlobal Lagos 2025 — Hackathon', description: '48-hour hackathon in Lagos, Nigeria. Build innovative Web3 projects with $500K+ in prizes. Zero Authority DAO is a sponsor with dedicated bounty track.', category: 'event', source: 'ETHGlobal', sourceUrl: 'https://ethglobal.com', reward: '500000+', rewardToken: 'USD', deadline: makeDeadline(45), tags: ['Hackathon', 'Lagos', 'ETH', 'IRL'], difficulty: 'intermediate', applicants: 1200, isHot: true, createdAt: new Date().toISOString(), raw: {} },
-    { id: 'mock-e2', title: 'Zero Authority DAO Community Call — Governance Vote', description: 'Monthly community call to discuss protocol upgrades, treasury allocations, and ecosystem partnerships. All ZA token holders can vote on 3 active proposals.', category: 'event', source: 'Zero Authority DAO', sourceUrl: 'https://zeroauthority.xyz', reward: 'Voting Power', rewardToken: 'XPZA', deadline: makeDeadline(5), tags: ['Governance', 'DAO', 'Community', 'Online'], difficulty: 'beginner', applicants: 230, isHot: false, createdAt: new Date().toISOString(), raw: {} },
+    // ── EVENTS ──
+    {
+      id: 'za-e1', title: 'Zero Authority DAO Community Governance Call',
+      description: 'Monthly governance call for the Zero Authority DAO community. Review active SIP proposals, discuss treasury decisions, and vote on key ecosystem upgrades.',
+      category: 'event', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/sip/proposals',
+      reward: 'Voting Power', rewardToken: 'STX',
+      deadline: makeDeadline(5), tags: ['Governance', 'DAO', 'SIP', 'Community'],
+      difficulty: 'beginner', applicants: 230, isHot: true, createdAt: new Date().toISOString(), raw: {}
+    },
+    {
+      id: 'za-e2', title: 'Stacks Quests — Earn by Learning',
+      description: 'Complete quests on Zero Authority to earn rewards while learning about the Stacks ecosystem, Bitcoin L2, and Web3 fundamentals.',
+      category: 'event', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/quests',
+      reward: 'STX Rewards', rewardToken: 'STX',
+      deadline: null, tags: ['Learning', 'Quests', 'Stacks', 'Beginner'],
+      difficulty: 'beginner', applicants: 520, isHot: true, createdAt: new Date().toISOString(), raw: {}
+    },
+    {
+      id: 'za-e3', title: 'Zero Authority MCP Integration Hackathon',
+      description: 'Build integrations using the Zero Authority MCP (Model Context Protocol). Use the API to create AI-powered tools for the Stacks ecosystem.',
+      category: 'event', source: 'Zero Authority DAO',
+      sourceUrl: 'https://zeroauthoritydao.com/guides/mcp',
+      reward: 'TBD', rewardToken: 'STX',
+      deadline: makeDeadline(21), tags: ['MCP', 'AI', 'API', 'Hackathon', 'Stacks'],
+      difficulty: 'advanced', applicants: 67, isHot: true, createdAt: new Date().toISOString(), raw: {}
+    },
   ];
 }
 
-// ─── Main aggregation entry point ─────────────────────────────────────────────
 async function fetchAllOpportunities() {
-  const [zaData, gitcoinData, deworkData] = await Promise.allSettled([
+  const [zaData, gitcoinData] = await Promise.allSettled([
     fetchZeroAuthority(),
     fetchGitcoinGrants(),
-    fetchDeworkBounties(),
   ]);
 
   const live = [
     ...(zaData.status === 'fulfilled' ? zaData.value : []),
     ...(gitcoinData.status === 'fulfilled' ? gitcoinData.value : []),
-    ...(deworkData.status === 'fulfilled' ? deworkData.value : []),
   ];
 
-  // If all APIs failed or returned empty, use rich mock data
   const all = live.length > 0 ? live : getMockData();
 
-  // Tag "hot" items — high applicants or marked featured
   return all.map(op => ({
     ...op,
     isHot: op.isHot || op.applicants > 20,
