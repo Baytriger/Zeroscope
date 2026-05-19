@@ -90,7 +90,13 @@
           </div>
 
           <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:var(--text);line-height:1.3;margin-bottom:6px;">
+            <% if (bm.sourceUrl) { %>
+            <a href="<%= bm.sourceUrl %>" target="_blank" rel="noopener noreferrer" style="color:var(--text);text-decoration:none;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text)'">
+              <%= bm.title %> <span style="font-size:0.75rem;color:var(--accent);">↗</span>
+            </a>
+            <% } else { %>
             <%= bm.title %>
+            <% } %>
           </h3>
 
           <% if (bm.description) { %>

@@ -84,7 +84,7 @@
           <% } %>
         </div>
         <button
-          onclick="saveBookmark(this, { opportunityId:'<%= op.id %>', title:`<%= op.title.replace(/`/g, '\\`').replace(/'/g,"\\x27") %>`, category:'<%= op.category %>', source:'<%= op.source %>', reward:'<%= op.reward %>', rewardToken:'<%= op.rewardToken %>', deadline:'<%= op.deadline || '' %>', tags:'<%= op.tags.join(',') %>', difficulty:'<%= op.difficulty %>' })"
+          onclick="saveBookmark(this, { opportunityId:'<%= op.id %>', title:`<%= op.title.replace(/`/g, '\\`').replace(/'/g,"\\x27") %>`, category:'<%= op.category %>', source:'<%= op.source %>', sourceUrl:'<%= op.sourceUrl || '' %>', reward:'<%= op.reward %>', rewardToken:'<%= op.rewardToken %>', deadline:'<%= op.deadline || '' %>', tags:'<%= op.tags.join(',') %>', difficulty:'<%= op.difficulty %>' })"
           class="w-full mt-3 btn-outline text-sm py-2 flex items-center justify-center gap-2"
           <%= bookmarkIds.includes(op.id) ? 'disabled style="color:var(--accent);border-color:var(--accent);"' : '' %>>
           <%= bookmarkIds.includes(op.id) ? '🔖 Saved' : '+ Save' %>
