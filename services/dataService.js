@@ -162,8 +162,13 @@ async function fetchAllOpportunities() {
     ...(w3cRes.status === 'fulfilled' ? w3cRes.value : []),
   ];
 
-  // If live APIs returned nothing useful, use mock data
-  const all = live.length >= 5 ? live : getMockData();
+  const mock = getMockData();
+
+  // Always include mock data, but deduplicate by id
+  // Live API data takes priority; mock fills in missing categories
+  const liveIds = new Set(live.map(o => o.id));
+  const mockFill = mock.filter(o => !liveIds.has(o.id));
+  const all = [...live, ...mockFill];
 
   return all.map(op => ({ ...op, isHot: op.isHot || (op.applicants || 0) > 20 }));
 }
