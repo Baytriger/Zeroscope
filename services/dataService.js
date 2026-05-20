@@ -66,58 +66,36 @@ async function fetchWeb3Career() {
 
 // ── Fetch Zero Authority DAO (real API) ────────────────────────────────────
 async function fetchZeroAuthority() {
-  const API_KEY = process.env.ZERO_AUTHORITY_API_KEY;
-  if (!API_KEY) { console.warn('⚠️  ZERO_AUTHORITY_API_KEY not set'); return []; }
-
-  const headers = { 'Authorization': `Bearer ${API_KEY}`, 'Accept': 'application/json' };
-  const BASE = 'https://zeroauthoritydao.com/api';
-
-  // Try multiple common endpoint patterns
-  const endpoints = [
-    { url: `${BASE}/bounties`,    cat: 'bounty' },
-    { url: `${BASE}/v1/bounties`, cat: 'bounty' },
-    { url: `${BASE}/gigs`,        cat: 'bounty' },
-    { url: `${BASE}/v1/gigs`,     cat: 'bounty' },
-    { url: `${BASE}/grants`,      cat: 'grant'  },
-    { url: `${BASE}/v1/grants`,   cat: 'grant'  },
-    { url: `${BASE}/events`,      cat: 'event'  },
-    { url: `${BASE}/v1/events`,   cat: 'event'  },
-  ];
-
-  const results = [];
-  for (const ep of endpoints) {
-    try {
-      const res = await axios.get(ep.url, { headers, timeout: 8000 });
-      const items = res.data?.data || res.data?.bounties || res.data?.gigs || res.data?.grants || res.data?.events || res.data || [];
-      if (Array.isArray(items) && items.length > 0) {
-        console.log(`✅ ZA API hit: ${ep.url} (${items.length} items)`);
-        items.forEach(item => results.push({
-          id: `za-api-${item.id || item._id || item.slug}`,
+  try {
+    const BASE = process.env.ZERO_AUTHORITY_API || 'https://api.zeroauthoritydao.com';
+    const [b, g, e] = await Promise.allSettled([
+      axios.get(`${BASE}/bounties`, { timeout: 8000 }),
+      axios.get(`${BASE}/grants`,   { timeout: 8000 }),
+      axios.get(`${BASE}/events`,   { timeout: 8000 }),
+    ]);
+    const parse = (res, cat) => res.status === 'fulfilled'
+      ? (res.value.data?.data || res.value.data || []).map(item => ({
+          id: `za-api-${item.id || item._id}`,
           title: item.title || item.name,
-          description: item.description || item.summary || '',
-          category: ep.cat,
+          description: item.description || '',
+          category: cat,
           source: 'Zero Authority DAO',
-          sourceUrl: item.url || item.link || item.externalUrl ||
-            `https://zeroauthoritydao.com/${ep.cat === 'grant' ? 'funding/degrants' : ep.cat === 'bounty' ? 'bounty' : 'events'}`,
-          reward: item.reward || item.rewardAmount || item.amount || 'TBD',
-          rewardToken: item.rewardToken || item.currency || item.token || 'STX',
-          deadline: item.deadline || item.endDate || item.expiresAt || null,
-          tags: Array.isArray(item.tags) ? item.tags : (item.skills?.map(s => s.skill || s) || []),
+          sourceUrl: item.url || item.link || `https://zeroauthoritydao.com/${cat === 'grant' ? 'funding/degrants' : cat}`,
+          reward: item.reward || item.amount || 'TBD',
+          rewardToken: item.rewardToken || item.currency || 'STX',
+          deadline: item.deadline || item.endDate || null,
+          tags: item.tags || item.skills || [],
           difficulty: item.difficulty || 'intermediate',
-          applicants: item.applicants || item.submissions || item.totalSubmissions || 0,
-          isHot: item.featured || item.isHot || false,
+          applicants: item.applicants || 0,
+          isHot: item.featured || false,
           createdAt: item.createdAt || new Date().toISOString(),
           raw: {},
-        }));
-        break; // found working endpoint for this category pattern, stop trying
-      }
-    } catch (err) {
-      // silently try next endpoint
-    }
+        })) : [];
+    return [...parse(b, 'bounty'), ...parse(g, 'grant'), ...parse(e, 'event')];
+  } catch (err) {
+    console.warn('⚠️  Zero Authority API failed:', err.message);
+    return [];
   }
-
-  if (results.length === 0) console.warn('⚠️  Zero Authority API: no data from any endpoint');
-  return results;
 }
 
 // ── Mock data (real links, used as fallback) ───────────────────────────────
@@ -184,13 +162,8 @@ async function fetchAllOpportunities() {
     ...(w3cRes.status === 'fulfilled' ? w3cRes.value : []),
   ];
 
-  const mock = getMockData();
-
-  // Always include mock data, but deduplicate by id
-  // Live API data takes priority; mock fills in missing categories
-  const liveIds = new Set(live.map(o => o.id));
-  const mockFill = mock.filter(o => !liveIds.has(o.id));
-  const all = [...live, ...mockFill];
+  // If live APIs returned nothing useful, use mock data
+  const all = live.length >= 5 ? live : getMockData();
 
   return all.map(op => ({ ...op, isHot: op.isHot || (op.applicants || 0) > 20 }));
 }
