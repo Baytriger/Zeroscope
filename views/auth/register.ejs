@@ -1,0 +1,88 @@
+<%- include('../partials/header') %>
+
+<main class="min-h-screen flex items-center justify-center px-4 py-16" style="position:relative;z-index:1;">
+  <div class="w-full max-w-md">
+
+    <!-- Logo -->
+    <div class="text-center mb-8">
+      <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;letter-spacing:0.05em;">
+        <span style="color:var(--accent);">ZERO</span><span style="color:var(--text);">SCOPE</span>
+      </div>
+      <p style="font-size:0.9rem;color:var(--text-muted);margin-top:6px;">Built for the Zero Authority DAO Community</p>
+    </div>
+
+    <div class="card p-8 fade-in">
+      <h1 style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:var(--text);margin-bottom:4px;">Create Account</h1>
+      <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:24px;">Join the ZeroScope contributor dashboard</p>
+
+      <% if (error && error.length) { %>
+      <div class="mb-4 px-4 py-3 rounded-lg" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#f87171;font-size:0.875rem;">
+        ⚠️ <%= error[0] %>
+      </div>
+      <% } %>
+
+      <% if (success && success.length) { %>
+      <div class="mb-4 px-4 py-3 rounded-lg" style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#34d399;font-size:0.875rem;">
+        ✅ <%= success[0] %>
+      </div>
+      <% } %>
+
+      <div class="flex flex-col gap-4">
+        <div>
+          <label style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.8rem;color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:6px;">Username</label>
+          <input type="text" name="username" id="username" class="zs-input" placeholder="CryptoBuilder99" minlength="3" maxlength="32" required />
+        </div>
+        <div>
+          <label style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.8rem;color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:6px;">Email</label>
+          <input type="email" name="email" id="email" class="zs-input" placeholder="you@example.com" required />
+        </div>
+        <div>
+          <label style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.8rem;color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:6px;">Password</label>
+          <input type="password" name="password" id="password" class="zs-input" placeholder="Min 6 characters" minlength="6" required />
+        </div>
+        <div>
+          <label style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.8rem;color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:6px;">Confirm Password</label>
+          <input type="password" name="confirmPassword" id="confirmPassword" class="zs-input" placeholder="Repeat password" required />
+        </div>
+
+        <button onclick="submitRegister()" class="btn-accent w-full mt-2" style="padding:14px;" id="registerBtn">
+          Create Account
+        </button>
+      </div>
+
+      <p style="text-align:center;margin-top:20px;font-size:0.875rem;color:var(--text-muted);">
+        Already have an account?
+        <a href="/auth/login" style="color:var(--accent);font-weight:600;text-decoration:none;">Sign in</a>
+      </p>
+    </div>
+  </div>
+</main>
+
+<script>
+function submitRegister() {
+  const form = {
+    username: document.getElementById('username').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    password: document.getElementById('password').value,
+    confirmPassword: document.getElementById('confirmPassword').value,
+  };
+
+  if (!form.username || !form.email || !form.password) {
+    return alert('Please fill in all fields.');
+  }
+  if (form.password !== form.confirmPassword) {
+    return alert('Passwords do not match.');
+  }
+
+  const btn = document.getElementById('registerBtn');
+  btn.disabled = true;
+  btn.textContent = 'Creating account...';
+
+  const body = new URLSearchParams(form);
+  fetch('/auth/register', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body })
+    .then(res => { window.location.href = res.url; })
+    .catch(() => { btn.disabled = false; btn.textContent = 'Create Account'; });
+}
+</script>
+
+<%- include('../partials/footer') %>

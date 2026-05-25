@@ -1,33 +1,38 @@
 const axios = require('axios');
 
-// ── Fetch Superteam Earn listings (bounties + jobs) ────────────────────────
+// ── Fetch Superteam Earn listings (real API) ───────────────────────────────
 async function fetchSuperteam() {
   try {
-    const res = await axios.get('https://earn.superteam.fun/api/listings', {
-      params: { take: 20, status: 'open' },
-      timeout: 8000,
-      headers: { 'Accept': 'application/json' },
+    const res = await axios.get('https://superteam.fun/api/agents/listings/live?take=20', {
+      headers: {
+        'Authorization': `Bearer ${process.env.SUPERTEAM_API_KEY}`,
+        'Accept': 'application/json',
+      },
+      timeout: 10000,
     });
-    const items = res.data?.bounties || res.data?.data || res.data || [];
+
+    const items = res.data?.listings || res.data?.data || res.data || [];
+    console.log(`✅ Superteam API: ${items.length} listings fetched`);
+
     return items.map(item => ({
       id: `st-${item.id || item.slug}`,
       title: item.title || item.name,
       description: item.description || item.shortDescription || '',
-      category: item.type === 'job' ? 'job' : 'bounty',
+      category: item.type === 'job' ? 'job' : item.type === 'grant' ? 'grant' : 'bounty',
       source: 'Superteam Earn',
-      sourceUrl: `https://earn.superteam.fun/listings/${item.slug || item.id}`,
+      sourceUrl: `https://earn.superteam.fun/listing/${item.slug || item.id}`,
       reward: item.rewardAmount ? `$${Number(item.rewardAmount).toLocaleString()}` : 'TBD',
       rewardToken: item.token || 'USDC',
       deadline: item.deadline || null,
       tags: item.skills?.map(s => s.skill || s) || item.tags || [],
       difficulty: item.difficulty || 'intermediate',
       applicants: item.totalSubmissions || item.applicants || 0,
-      isHot: (item.totalSubmissions || 0) > 15 || item.isFeatured || false,
+      isHot: item.isFeatured || (item.totalSubmissions || 0) > 15 || false,
       createdAt: item.createdAt || new Date().toISOString(),
       raw: {},
     }));
   } catch (err) {
-    console.warn('⚠️  Superteam fetch failed:', err.message);
+    console.warn('⚠️  Superteam API failed:', err.message);
     return [];
   }
 }
@@ -64,38 +69,48 @@ async function fetchWeb3Career() {
   }
 }
 
-// ── Fetch Zero Authority DAO (real API) ────────────────────────────────────
+// ── Fetch Zero Authority DAO (public API, no key needed) ───────────────────
 async function fetchZeroAuthority() {
-  try {
-    const BASE = process.env.ZERO_AUTHORITY_API || 'https://api.zeroauthoritydao.com';
-    const [b, g, e] = await Promise.allSettled([
-      axios.get(`${BASE}/bounties`, { timeout: 8000 }),
-      axios.get(`${BASE}/grants`,   { timeout: 8000 }),
-      axios.get(`${BASE}/events`,   { timeout: 8000 }),
-    ]);
-    const parse = (res, cat) => res.status === 'fulfilled'
-      ? (res.value.data?.data || res.value.data || []).map(item => ({
-          id: `za-api-${item.id || item._id}`,
+  const BASE = 'https://zeroauthoritydao.com/api';
+  const endpoints = [
+    { url: `${BASE}/bounties`, cat: 'bounty' },
+    { url: `${BASE}/gigs`,     cat: 'bounty' },
+    { url: `${BASE}/jobs`,     cat: 'job'    },
+    { url: `${BASE}/events`,   cat: 'event'  },
+  ];
+
+  const results = [];
+  await Promise.allSettled(endpoints.map(async (ep) => {
+    try {
+      const res = await axios.get(ep.url, { timeout: 8000, headers: { 'Accept': 'application/json' } });
+      const items = res.data?.data || res.data?.bounties || res.data?.gigs || res.data?.jobs || res.data?.events || res.data || [];
+      if (Array.isArray(items) && items.length > 0) {
+        console.log(`✅ ZA API hit: ${ep.url} (${items.length} items)`);
+        items.forEach(item => results.push({
+          id: `za-${item.id || item._id || item.slug}`,
           title: item.title || item.name,
-          description: item.description || '',
-          category: cat,
+          description: item.description || item.summary || '',
+          category: ep.cat,
           source: 'Zero Authority DAO',
-          sourceUrl: item.url || item.link || `https://zeroauthoritydao.com/${cat === 'grant' ? 'funding/degrants' : cat}`,
-          reward: item.reward || item.amount || 'TBD',
-          rewardToken: item.rewardToken || item.currency || 'STX',
-          deadline: item.deadline || item.endDate || null,
-          tags: item.tags || item.skills || [],
+          sourceUrl: item.url || item.link || item.externalUrl ||
+            `https://zeroauthoritydao.com/${ep.cat === 'job' ? 'jobs' : ep.cat === 'bounty' ? 'bounty' : ep.cat}`,
+          reward: item.reward || item.rewardAmount || item.amount || 'TBD',
+          rewardToken: item.rewardToken || item.currency || item.token || 'STX',
+          deadline: item.deadline || item.endDate || item.expiresAt || null,
+          tags: Array.isArray(item.tags) ? item.tags : (item.skills?.map(s => s.skill || s) || []),
           difficulty: item.difficulty || 'intermediate',
-          applicants: item.applicants || 0,
-          isHot: item.featured || false,
+          applicants: item.applicants || item.submissions || item.totalSubmissions || 0,
+          isHot: item.featured || item.isHot || false,
           createdAt: item.createdAt || new Date().toISOString(),
           raw: {},
-        })) : [];
-    return [...parse(b, 'bounty'), ...parse(g, 'grant'), ...parse(e, 'event')];
-  } catch (err) {
-    console.warn('⚠️  Zero Authority API failed:', err.message);
-    return [];
-  }
+        }));
+      }
+    } catch (err) {
+      console.warn(`⚠️  ZA endpoint ${ep.url} failed:`, err.message);
+    }
+  }));
+
+  return results;
 }
 
 // ── Mock data (real links, used as fallback) ───────────────────────────────
@@ -127,24 +142,25 @@ function getMockData() {
     { id:'za-e2', title:'Stacks Quests — Earn by Learning', description:'Complete quests to earn rewards while learning about Stacks, Bitcoin L2, and Web3 fundamentals.',               category:'event', source:'Zero Authority DAO', sourceUrl:'https://zeroauthoritydao.com/quests',        reward:'STX Rewards',  rewardToken:'STX', deadline:null,  tags:['Learning','Quests','Beginner'], difficulty:'beginner', applicants:520, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
     { id:'za-e3', title:'MCP Integration Hackathon',        description:'Build integrations using the Zero Authority MCP. Create AI-powered tools for the Stacks ecosystem.',             category:'event', source:'Zero Authority DAO', sourceUrl:'https://zeroauthoritydao.com/guides/mcp',   reward:'TBD',          rewardToken:'STX', deadline:d(21), tags:['MCP','AI','Hackathon'],         difficulty:'advanced', applicants:67,  isHot:true,  createdAt:new Date().toISOString(), raw:{} },
 
-    // Superteam Earn Bounties (fallback)
-    { id:'st-f1', title:'Write a Technical Deep-Dive on Solana DeFi', description:'Research and write a comprehensive technical article covering a Solana DeFi protocol. Must be 2000+ words with code examples.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://earn.superteam.fun/bounties/', reward:'$500', rewardToken:'USDC', deadline:d(10), tags:['Content','Writing','Solana','DeFi'], difficulty:'intermediate', applicants:32, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
-    { id:'st-f2', title:'Design a DeFi Dashboard UI Kit',               description:'Create a comprehensive Figma UI kit for DeFi dashboards. Must include components, tokens, and documentation.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://earn.superteam.fun/bounties/', reward:'$800', rewardToken:'USDC', deadline:d(8),  tags:['Design','Figma','DeFi','UI/UX'],    difficulty:'intermediate', applicants:21, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
-    { id:'st-f3', title:'Build a Solana Wallet Tracker CLI',            description:'Build a command-line tool to track Solana wallet activity, token balances, and transaction history.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://earn.superteam.fun/bounties/', reward:'$1,200', rewardToken:'USDC', deadline:d(14), tags:['Development','Solana','CLI','TypeScript'], difficulty:'advanced', applicants:14, isHot:false, createdAt:new Date().toISOString(), raw:{} },
-    { id:'st-f4', title:'Crypto Twitter Growth Strategy for Web3 Startup', description:'Develop a 90-day Twitter/X growth strategy for a Web3 startup including content calendar, engagement tactics, and KPIs.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://earn.superteam.fun/bounties/', reward:'$350', rewardToken:'USDC', deadline:d(6),  tags:['Marketing','Twitter','Social Media','Content'], difficulty:'beginner', applicants:45, isHot:true, createdAt:new Date().toISOString(), raw:{} },
-    { id:'st-f5', title:'Video Tutorial: Intro to Anchor Framework',    description:'Create a beginner-friendly video tutorial (15-30 mins) explaining the Anchor framework for Solana development.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://earn.superteam.fun/bounties/', reward:'$600', rewardToken:'USDC', deadline:d(12), tags:['Video','Education','Solana','Anchor'], difficulty:'intermediate', applicants:18, isHot:false, createdAt:new Date().toISOString(), raw:{} },
+    // Superteam Earn — verified live listings (May 2026)
+    { id:'st-f1', title:'Create X Content to Introduce Moony',                    description:'Moony Foundation seeking creators to produce X (Twitter) content introducing the Moony project. Design & Content skills. $300 USDC total prizes — multiple winners.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/moony/',                                                                reward:'$300',  rewardToken:'USDC', deadline:d(7),  tags:['Content','Twitter','Design','Solana'],      difficulty:'beginner',     applicants:93, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
+    { id:'st-f2', title:'HelpBnk x Superteam | Business Challenge',               description:'Superteam UK & HelpBnk challenge you to propose Web3 + banking business solutions. $10,000 USDG total across 10 winners. Content, Growth, Dev all welcome.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/helpbnk-superteam-business-challenge-march-2026/',                    reward:'$10,000', rewardToken:'USDG', deadline:d(3),  tags:['Business','Content','Growth','Finance'],    difficulty:'intermediate', applicants:74, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
+    { id:'st-f3', title:'Write About Trepa — $1,500 Documentation Bounty',        description:'Trepa seeking writers to create docs, tutorials or explainers. $1,500 USDC bounty. Strong writing and Web3 knowledge required.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/write-about-trepa-1500-usdc/',                                                                      reward:'$1,500', rewardToken:'USDC', deadline:d(6),  tags:['Writing','Documentation','Content','Web3'], difficulty:'intermediate', applicants:38, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
+    { id:'st-f4', title:'Solana Consumer Day — Best Consumer Insights Thread',     description:'Superteam Black asking for the best consumer insights Twitter thread about the Solana ecosystem. Multiple winners. Open globally.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/solana-consumer-day-best-consumer-insights-thread',                                             reward:'TBD',    rewardToken:'USDC', deadline:d(5),  tags:['Content','Twitter','Solana','Research'],    difficulty:'beginner',     applicants:41, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
+    { id:'st-f5', title:'Promote Solana Summit Kazakhstan — Content & Community',  description:'Superteam Kazakhstan looking for creators to promote the Solana Summit Kazakhstan event through content and community engagement.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/promote-solana-summit-kazakhstan-content-and-community-bounty/',                              reward:'TBD',    rewardToken:'USDC', deadline:d(2),  tags:['Marketing','Community','Solana','Events'],  difficulty:'beginner',     applicants:29, isHot:false, createdAt:new Date().toISOString(), raw:{} },
+    { id:'st-f6', title:'Loofta Pay x MagicBlock — Creator & Content Bounty',     description:'Superteam Ireland bounty for creators to produce content for Loofta Pay and MagicBlock. Multiple formats accepted — threads, videos, articles.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/loofta-pay-x-magicblock-creator-and-content-bounty/',                              reward:'TBD',    rewardToken:'USDC', deadline:d(8),  tags:['Content','Marketing','Solana','Payments'],  difficulty:'beginner',     applicants:22, isHot:false, createdAt:new Date().toISOString(), raw:{} },
+    { id:'st-f7', title:'Kazakhstan Solana Projects Spotlight — Content Bounty',   description:'Superteam Kazakhstan wants content spotlighting Solana projects building in Kazakhstan. Writers, designers, and video creators welcome.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/kazakhstan-solana-projects-spotlight-content-bounty/',                                   reward:'TBD',    rewardToken:'USDC', deadline:d(10), tags:['Content','Spotlight','Solana','Community'],  difficulty:'beginner',     applicants:18, isHot:false, createdAt:new Date().toISOString(), raw:{} },
 
-    // Web3.career Jobs (fallback)
-    { id:'w3c-f1', title:'Senior Solidity Developer',       description:'Leading DeFi protocol hiring experienced Solidity developer. Work on core protocol contracts, audits, and upgrades. Remote-first.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/solidity-jobs', reward:'$120k–$180k', rewardToken:'USD', deadline:null, tags:['Solidity','DeFi','Smart Contracts','Remote'], difficulty:'expert',        applicants:0, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
-    { id:'w3c-f2', title:'Web3 Community Manager',          description:'Fast-growing NFT/gaming project seeks passionate community manager for Discord, Twitter, and Telegram. Remote position.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/community-jobs', reward:'$60k–$90k',   rewardToken:'USD', deadline:null, tags:['Community','Discord','Social Media','Remote'], difficulty:'beginner',     applicants:0, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
-    { id:'w3c-f3', title:'Blockchain Product Manager',      description:'DeFi startup looking for a PM with Web3 experience to drive product roadmap and coordinate with engineering and design teams.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/product-jobs', reward:'$100k–$150k', rewardToken:'USD', deadline:null, tags:['Product','Management','DeFi','Remote'],        difficulty:'intermediate', applicants:0, isHot:false, createdAt:new Date().toISOString(), raw:{} },
-    { id:'w3c-f4', title:'UI/UX Designer — DeFi Protocol',  description:'Design intuitive interfaces for complex DeFi products. Experience with Figma and understanding of Web3 UX patterns required.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/design-jobs', reward:'$80k–$120k',  rewardToken:'USD', deadline:null, tags:['Design','UI/UX','Figma','DeFi'],               difficulty:'intermediate', applicants:0, isHot:false, createdAt:new Date().toISOString(), raw:{} },
-    { id:'w3c-f5', title:'DevRel Engineer — Layer 2 Protocol', description:'Developer Relations engineer to create tutorials, run workshops, and build developer community for a growing L2 protocol.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/developer-relations-jobs', reward:'$90k–$130k', rewardToken:'USD', deadline:null, tags:['DevRel','L2','Education','Remote'],          difficulty:'intermediate', applicants:0, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
-    { id:'w3c-f6', title:'Web3 Content Writer / Copywriter', description:'Write blog posts, documentation, newsletters, and social content for Web3 projects. Crypto-native voice, research skills a must.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/content-jobs', reward:'$50k–$80k',   rewardToken:'USD', deadline:null, tags:['Writing','Content','Marketing','Remote'],      difficulty:'beginner',     applicants:0, isHot:false, createdAt:new Date().toISOString(), raw:{} },
-    { id:'w3c-f7', title:'Rust Developer — Solana Programs', description:'Build high-performance on-chain programs using Rust for a Solana-native protocol. Deep Rust expertise required.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/rust-jobs', reward:'$140k–$200k', rewardToken:'USD', deadline:null, tags:['Rust','Solana','Smart Contracts','Remote'],   difficulty:'expert',        applicants:0, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
+    // Web3.career Jobs — real working category pages
+    { id:'w3c-f1', title:'Remote Solana Developer',              description:'Multiple companies hiring remote Solana developers on Web3.career. Roles span Rust smart contracts, frontend dApps, and protocol engineering.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/remote+solana-jobs',          reward:'$120k–$250k', rewardToken:'USD', deadline:null, tags:['Solana','Rust','Remote','Development'],        difficulty:'expert',        applicants:0, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
+    { id:'w3c-f2', title:'Web3 Community Manager (Remote)',       description:'Fast-growing NFT and DeFi projects seeking community managers for Discord, Twitter, and Telegram. No coding required. Remote positions open now.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/non-tech+remote-jobs',         reward:'$60k–$90k',   rewardToken:'USD', deadline:null, tags:['Community','Discord','Remote','Non-Tech'],     difficulty:'beginner',     applicants:0, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
+    { id:'w3c-f3', title:'Web3 Content Writer / Copywriter',      description:'Write blog posts, documentation, newsletters, and social content for Web3 projects. Remote. Crypto-native voice and research skills required.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/non-tech+remote-jobs',         reward:'$50k–$80k',   rewardToken:'USD', deadline:null, tags:['Writing','Content','Marketing','Remote'],      difficulty:'beginner',     applicants:0, isHot:false, createdAt:new Date().toISOString(), raw:{} },
+    { id:'w3c-f4', title:'Frontend Web3 Engineer (Remote)',        description:'Leading Web3 protocols hiring frontend engineers with React/Next.js experience. Build dApp interfaces, trading dashboards, and wallet UIs.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/web3-jobs-Remote+front-end',    reward:'$90k–$180k',  rewardToken:'USD', deadline:null, tags:['Frontend','React','Remote','DeFi'],            difficulty:'intermediate', applicants:0, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
+    { id:'w3c-f5', title:'Solana Foundation — Business Development', description:'Solana Foundation hiring BD leads for payments and fintech. Drive strategic adoption with major financial institutions and enterprise partners.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/web3-companies/solanafoundation+business-development', reward:'Competitive', rewardToken:'USD', deadline:null, tags:['BD','Solana','Fintech','Non-Tech'],           difficulty:'advanced',     applicants:0, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
+    { id:'w3c-f6', title:'Remote Non-Tech Web3 Jobs',             description:'Browse dozens of open non-technical Web3 roles — marketing, operations, customer support, social media, and more. All remote on Web3.career.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/non-tech+remote-jobs',         reward:'Varies',      rewardToken:'USD', deadline:null, tags:['Non-Tech','Remote','Marketing','Operations'],  difficulty:'beginner',     applicants:0, isHot:false, createdAt:new Date().toISOString(), raw:{} },
 
     // Web3 Foundation Grants
-    { id:'w3f-g1', title:'Web3 Foundation Grant — Open Source Tools', description:'Web3 Foundation funds open-source projects that benefit the Polkadot and Substrate ecosystem. Grants from $10k to $100k+.', category:'grant', source:'Web3 Foundation', sourceUrl:'https://grants.web3.foundation/applications', reward:'$10k–$100k+', rewardToken:'USD', deadline:null, tags:['Polkadot','Substrate','Open Source','Infrastructure'], difficulty:'advanced', applicants:0, isHot:false, createdAt:new Date().toISOString(), raw:{} },
+    { id:'w3f-g1', title:'Web3 Foundation Open Grants Program', description:'Web3 Foundation funds open-source projects benefiting the Polkadot and Substrate ecosystem. Grants range from $10k to $100k+. Apply via GitHub.', category:'grant', source:'Web3 Foundation', sourceUrl:'https://grants.web3.foundation/applications', reward:'$10k–$100k+', rewardToken:'USD', deadline:null, tags:['Polkadot','Substrate','Open Source','Infrastructure'], difficulty:'advanced', applicants:0, isHot:false, createdAt:new Date().toISOString(), raw:{} },
   ];
 }
 

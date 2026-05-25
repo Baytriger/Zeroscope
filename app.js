@@ -48,6 +48,8 @@ app.use((req, res, next) => {
   res.locals.success = req.flash('success');
   res.locals.error = req.flash('error');
   res.locals.walletAddress = req.session.walletAddress || null;
+  res.locals.userId = req.session.userId || null;
+  res.locals.username = req.session.username || null;
   res.locals.userBadges = req.session.userBadges || [];
   res.locals.notifications = req.session.notifications || [];
   res.locals.currentPath = req.path;
@@ -61,6 +63,7 @@ const walletRoutes    = require('./routes/wallet');
 const apiRoutes       = require('./routes/api');
 const notifRoutes     = require('./routes/notifications');
 const profileRoutes   = require('./routes/profile');
+const authRoutes      = require('./routes/auth');
 
 app.use('/', dashboardRoutes);
 app.use('/bookmarks', bookmarkRoutes);
@@ -68,6 +71,7 @@ app.use('/wallet', walletRoutes);
 app.use('/api', apiRoutes);
 app.use('/notifications', notifRoutes);
 app.use('/profile', profileRoutes);
+app.use('/auth', authRoutes);
 
 // ─── Scheduled Jobs ───────────────────────────────────────────────────────────
 const { checkDeadlines } = require('./services/notificationService');

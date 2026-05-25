@@ -7,108 +7,165 @@
       Your <span style="color:var(--accent);">Profile</span>
     </h1>
     <p style="font-size:1rem;color:var(--text-muted);margin-top:6px;">
-      Set your username and profile picture for the Zero Authority DAO community.
+      Set your skills so ZEROSCOPE can rank the best opportunities for you.
     </p>
   </div>
 
-  <% if (!walletAddress) { %>
+  <% if (!walletAddress && !loggedInUser) { %>
   <div class="card p-10 text-center fade-in">
     <div style="font-size:3rem;margin-bottom:16px;">🔌</div>
-    <h2 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:8px;">Connect Your Wallet First</h2>
-    <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:20px;">You need to connect a wallet to set up your profile.</p>
-    <button onclick="openWalletModal()" class="btn-accent">Connect Wallet</button>
+    <h2 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:8px;">Sign In or Connect Wallet</h2>
+    <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:20px;">You need to be signed in to set up your profile.</p>
+    <div class="flex gap-3 justify-center flex-wrap">
+      <a href="/auth/login" class="btn-accent">Sign In</a>
+      <button onclick="openWalletModal()" class="btn-accent" style="background:transparent;border:1px solid var(--accent);color:var(--accent);">Connect Wallet</button>
+    </div>
   </div>
   <% } else { %>
 
-  <div class="card p-6 sm:p-8 fade-in">
+  <!-- ── Account Info ── -->
+  <% if (loggedInUser) { %>
+  <div class="card p-6 mb-6 fade-in">
+    <div class="flex items-center gap-4">
+      <div class="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,var(--accent),var(--purple));font-size:1.8rem;">
+        <%= loggedInUser.avatar ? '' : '👤' %>
+      </div>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--text);"><%= loggedInUser.username %></div>
+        <div style="font-size:0.85rem;color:var(--text-muted);"><%= loggedInUser.email %></div>
+        <div class="flex items-center gap-2 mt-1">
+          <span class="badge" style="background:rgba(var(--accent-rgb),0.15);color:var(--accent);border:1px solid rgba(var(--accent-rgb),0.3);font-size:0.7rem;">
+            <%= loggedInUser.experienceLevel || 'intermediate' %>
+          </span>
+          <% if (loggedInUser.skills && loggedInUser.skills.length > 0) { %>
+          <span style="font-size:0.75rem;color:var(--text-dim);"><%= loggedInUser.skills.length %> skill<%= loggedInUser.skills.length !== 1 ? 's' : '' %> saved</span>
+          <% } else { %>
+          <span style="font-size:0.75rem;color:#f59e0b;">⚠️ Add skills to get personalized rankings</span>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <!-- Avatar Upload Area -->
-    <div class="flex flex-col items-center mb-8">
-      <div id="avatarRing" onclick="document.getElementById('avatarInput').click()" 
-           class="relative cursor-pointer group"
-           style="width:110px;height:110px;">
-        <!-- Circle -->
+  <!-- ── Skills & Personalization ── -->
+  <div class="card p-6 sm:p-8 mb-6 fade-in">
+    <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--text);margin-bottom:4px;">🎯 Skills & Personalization</h2>
+    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">These are used to score and rank opportunities for you. The more accurate, the better your matches.</p>
+
+    <!-- Experience Level -->
+    <div class="mb-5">
+      <label style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.8rem;color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:10px;">Experience Level</label>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="levelPicker">
+        <% ['beginner', 'intermediate', 'advanced', 'expert'].forEach(function(lvl) { %>
+        <button
+          onclick="selectLevel('<%= lvl %>')"
+          id="level-<%= lvl %>"
+          class="level-btn py-2.5 px-3 rounded-lg text-sm font-semibold transition-all"
+          style="border:1px solid <%= (loggedInUser.experienceLevel || 'intermediate') === lvl ? 'var(--accent)' : 'var(--border)' %>;
+                 background:<%= (loggedInUser.experienceLevel || 'intermediate') === lvl ? 'rgba(var(--accent-rgb),0.12)' : 'var(--bg-card2)' %>;
+                 color:<%= (loggedInUser.experienceLevel || 'intermediate') === lvl ? 'var(--accent)' : 'var(--text-muted)' %>;
+                 font-family:'Syne',sans-serif;">
+          <%= lvl === 'beginner' ? '🌱' : lvl === 'intermediate' ? '⚡' : lvl === 'advanced' ? '🔥' : '🏆' %>
+          <%= lvl.charAt(0).toUpperCase() + lvl.slice(1) %>
+        </button>
+        <% }) %>
+      </div>
+      <input type="hidden" id="selectedLevel" value="<%= loggedInUser.experienceLevel || 'intermediate' %>" />
+    </div>
+
+    <!-- Skills -->
+    <div class="mb-5">
+      <label style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.8rem;color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:10px;">Your Skills</label>
+
+      <!-- Quick-pick skill chips -->
+      <div class="flex flex-wrap gap-2 mb-3">
+        <% const quickSkills = ['Content', 'Marketing', 'Design', 'UI/UX', 'Development', 'Solidity', 'Rust', 'React', 'Web3', 'Community', 'Video', 'Research', 'Business', 'DevRel', 'Solana', 'DeFi', 'NFT', 'Python', 'TypeScript', 'Node']; %>
+        <% quickSkills.forEach(function(skill) { %>
+        <button
+          onclick="toggleSkill('<%= skill %>')"
+          id="skill-<%= skill %>"
+          class="skill-chip px-3 py-1.5 rounded-full text-xs font-semibold transition-all"
+          style="border:1px solid <%= (loggedInUser.skills || []).map(s => s.toLowerCase()).includes(skill.toLowerCase()) ? 'var(--accent)' : 'var(--border)' %>;
+                 background:<%= (loggedInUser.skills || []).map(s => s.toLowerCase()).includes(skill.toLowerCase()) ? 'rgba(var(--accent-rgb),0.15)' : 'var(--bg-card2)' %>;
+                 color:<%= (loggedInUser.skills || []).map(s => s.toLowerCase()).includes(skill.toLowerCase()) ? 'var(--accent)' : 'var(--text-muted)' %>;
+                 font-family:'Syne',sans-serif;cursor:pointer;">
+          <%= skill %>
+        </button>
+        <% }) %>
+      </div>
+
+      <!-- Custom skill input -->
+      <div class="flex gap-2">
+        <input type="text" id="customSkillInput" class="zs-input flex-1" placeholder="Add a custom skill..." maxlength="30"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomSkill();}" />
+        <button onclick="addCustomSkill()" class="px-4 py-2 rounded-lg text-sm font-semibold" style="background:var(--accent);color:#000;font-family:'Syne',sans-serif;">Add</button>
+      </div>
+
+      <!-- Selected skills display -->
+      <div id="selectedSkillsDisplay" class="flex flex-wrap gap-2 mt-3 min-h-[32px]">
+        <!-- populated by JS -->
+      </div>
+      <p style="font-size:0.75rem;color:var(--text-dim);margin-top:6px;">Click chips to select · Add custom skills · Your selections power the recommendation engine</p>
+    </div>
+
+    <button onclick="saveSkills()" class="btn-accent w-full" style="padding:14px;" id="skillsBtn">
+      💾 Save Skills & Personalize Dashboard
+    </button>
+    <p id="skillsMsg" class="text-center hidden mt-3" style="font-size:0.85rem;font-family:'Syne',sans-serif;"></p>
+  </div>
+  <% } %>
+
+  <!-- ── Wallet Profile ── -->
+  <% if (walletAddress) { %>
+  <div class="card p-6 sm:p-8 mb-6 fade-in">
+    <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--text);margin-bottom:16px;">🔗 Wallet Profile</h2>
+
+    <div class="flex flex-col items-center mb-6">
+      <div id="avatarRing" onclick="document.getElementById('avatarInput').click()"
+           class="relative cursor-pointer group" style="width:100px;height:100px;">
         <div id="avatarCircle" class="w-full h-full rounded-full overflow-hidden flex items-center justify-center"
              style="background:linear-gradient(135deg,var(--accent),var(--purple));border:3px solid var(--border-hover);">
           <% if (profile && profile.avatar) { %>
             <img id="avatarImg" src="<%= profile.avatar %>" alt="Avatar" class="w-full h-full object-cover" />
           <% } else { %>
-            <span id="avatarEmoji" style="font-size:2.8rem;">👤</span>
+            <span style="font-size:2.5rem;">👤</span>
           <% } %>
         </div>
-        <!-- Hover overlay -->
         <div class="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
              style="background:rgba(0,0,0,0.55);">
-          <div style="text-align:center;">
-            <div style="font-size:1.4rem;">📷</div>
-            <div style="font-size:0.65rem;color:#fff;font-family:'Syne',sans-serif;font-weight:700;margin-top:2px;">CHANGE</div>
-          </div>
+          <div style="text-align:center;"><div style="font-size:1.2rem;">📷</div><div style="font-size:0.6rem;color:#fff;font-family:'Syne',sans-serif;font-weight:700;">CHANGE</div></div>
         </div>
       </div>
-
       <input type="file" id="avatarInput" accept="image/*" class="hidden" onchange="previewAvatar(event)" />
-      <p style="font-size:0.75rem;color:var(--text-dim);margin-top:10px;font-family:'DM Sans',sans-serif;">
-        Tap the photo to upload from your gallery · Max 2MB
-      </p>
-
-      <!-- Profile name + tier below avatar -->
-      <div style="margin-top:10px;text-align:center;">
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:var(--text);">
-          <%= (profile && profile.displayName) ? profile.displayName : 'Anonymous' %>
-        </div>
-        <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">
-          <%= walletAddress.slice(0,8) %>...<%= walletAddress.slice(-6) %>
-        </div>
-        <% if (profile) { %>
-        <div class="flex items-center justify-center gap-2 mt-2">
-          <span style="font-size:1rem;"><%= profile.tier ? profile.tier.icon : '🌱' %></span>
-          <span style="font-size:0.8rem;font-family:'Syne',sans-serif;font-weight:600;color:var(--accent);"><%= profile.tier ? profile.tier.name : 'Newcomer' %></span>
-          <span style="font-size:0.8rem;color:var(--text-muted);font-weight:700;font-family:'Syne',sans-serif;"><%= profile.reputationScore || 0 %> REP</span>
-        </div>
-        <% } %>
-      </div>
+      <div style="font-size:0.78rem;color:var(--text-muted);margin-top:8px;"><%= walletAddress.slice(0,8) %>...<%= walletAddress.slice(-6) %></div>
     </div>
 
-    <!-- Username Field -->
-    <div class="flex flex-col gap-5">
+    <div class="flex flex-col gap-4">
       <div>
-        <label style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.85rem;color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:8px;">Username</label>
-        <input
-          type="text"
-          id="displayName"
-          class="zs-input"
-          placeholder="e.g. CryptoBuilder99"
-          maxlength="32"
-          value="<%= (profile && profile.displayName) ? profile.displayName : '' %>"
-        />
-        <p style="font-size:0.75rem;color:var(--text-dim);margin-top:6px;">Up to 32 characters. Visible to the community.</p>
+        <label style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.8rem;color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:6px;">Display Name</label>
+        <input type="text" id="displayName" class="zs-input" placeholder="e.g. CryptoBuilder99" maxlength="32"
+          value="<%= (profile && profile.displayName) ? profile.displayName : '' %>" />
       </div>
-
-      <button onclick="saveProfile()" class="btn-accent w-full" style="padding:14px;" id="saveBtn">
-        Save Profile
-      </button>
-
+      <button onclick="saveProfile()" class="btn-accent w-full" style="padding:14px;" id="saveBtn">Save Wallet Profile</button>
       <p id="saveMsg" class="text-center hidden" style="font-size:0.85rem;font-family:'Syne',sans-serif;"></p>
     </div>
   </div>
+  <% } %>
 
-  <% if (profile) { %>
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
+  <!-- ── Stats ── -->
+  <% if (loggedInUser) { %>
+  <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-2">
     <div class="stat-card text-center">
-      <div class="stat-value" style="font-size:1.5rem;"><%= profile.reputationScore || 0 %></div>
-      <div class="stat-label">Reputation</div>
+      <div class="stat-value" style="font-size:1.5rem;"><%= (loggedInUser.skills || []).length %></div>
+      <div class="stat-label">Skills Saved</div>
     </div>
     <div class="stat-card text-center">
-      <div class="stat-value" style="font-size:1.5rem;color:#22d3ee;"><%= profile.totalBounties || 0 %></div>
-      <div class="stat-label">Bounties</div>
+      <div class="stat-value" style="font-size:1.5rem;color:var(--accent);text-transform:capitalize;font-size:1rem;"><%= loggedInUser.experienceLevel || 'Not set' %></div>
+      <div class="stat-label">Experience</div>
     </div>
-    <div class="stat-card text-center">
-      <div class="stat-value" style="font-size:1.5rem;color:#10b981;"><%= profile.totalGrants || 0 %></div>
-      <div class="stat-label">Grants</div>
-    </div>
-    <div class="stat-card text-center">
-      <div class="stat-value" style="font-size:1.5rem;color:#f59e0b;"><%= profile.bookmarkCount || 0 %></div>
-      <div class="stat-label">Bookmarks</div>
+    <div class="stat-card text-center col-span-2 sm:col-span-1">
+      <div class="stat-value" style="font-size:1rem;color:#22d3ee;"><%= loggedInUser.skills && loggedInUser.skills.length > 0 ? '✅ Active' : '⚠️ Setup needed' %></div>
+      <div class="stat-label">Personalization</div>
     </div>
   </div>
   <% } %>
@@ -117,63 +174,165 @@
 </main>
 
 <script>
-let selectedFile = null;
+// ── Skill management ────────────────────────────────────────────────────────
+const selectedSkills = new Set(<%= JSON.stringify((loggedInUser && loggedInUser.skills) ? loggedInUser.skills : []) %>);
 
-function previewAvatar(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  if (file.size > 2 * 1024 * 1024) {
-    showToast('Image too large. Max 2MB.', 'error');
+function renderSelectedSkills() {
+  const container = document.getElementById('selectedSkillsDisplay');
+  if (!container) return;
+  container.innerHTML = '';
+  if (selectedSkills.size === 0) {
+    container.innerHTML = '<span style="font-size:0.8rem;color:var(--text-dim);font-style:italic;">No skills selected yet</span>';
     return;
   }
-  selectedFile = file;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const circle = document.getElementById('avatarCircle');
-    circle.innerHTML = `<img src="${e.target.result}" alt="Avatar" class="w-full h-full object-cover" />`;
-  };
-  reader.readAsDataURL(file);
+  selectedSkills.forEach(skill => {
+    const tag = document.createElement('span');
+    tag.innerHTML = `${skill} <span onclick="removeSkill('${skill}')" style="cursor:pointer;opacity:0.6;margin-left:2px;">✕</span>`;
+    tag.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;background:rgba(var(--accent-rgb),0.15);color:var(--accent);border:1px solid rgba(var(--accent-rgb),0.3);font-size:0.75rem;font-family:\'Syne\',sans-serif;font-weight:600;';
+    container.appendChild(tag);
+  });
 }
 
-async function saveProfile() {
-  const displayName = document.getElementById('displayName').value.trim();
-  const btn = document.getElementById('saveBtn');
-  const msg = document.getElementById('saveMsg');
+function toggleSkill(skill) {
+  const btn = document.getElementById(`skill-${skill}`);
+  if (selectedSkills.has(skill)) {
+    selectedSkills.delete(skill);
+    if (btn) {
+      btn.style.borderColor = 'var(--border)';
+      btn.style.background  = 'var(--bg-card2)';
+      btn.style.color       = 'var(--text-muted)';
+    }
+  } else {
+    selectedSkills.add(skill);
+    if (btn) {
+      btn.style.borderColor = 'var(--accent)';
+      btn.style.background  = 'rgba(var(--accent-rgb),0.15)';
+      btn.style.color       = 'var(--accent)';
+    }
+  }
+  renderSelectedSkills();
+}
+
+function addCustomSkill() {
+  const input = document.getElementById('customSkillInput');
+  const val = input.value.trim();
+  if (!val) return;
+  selectedSkills.add(val);
+  input.value = '';
+  renderSelectedSkills();
+  showToast(`Added: ${val}`, 'success');
+}
+
+function removeSkill(skill) {
+  selectedSkills.delete(skill);
+  // Also deselect chip if visible
+  const btn = document.getElementById(`skill-${skill}`);
+  if (btn) {
+    btn.style.borderColor = 'var(--border)';
+    btn.style.background  = 'var(--bg-card2)';
+    btn.style.color       = 'var(--text-muted)';
+  }
+  renderSelectedSkills();
+}
+
+// ── Level picker ─────────────────────────────────────────────────────────────
+function selectLevel(level) {
+  document.getElementById('selectedLevel').value = level;
+  ['beginner','intermediate','advanced','expert'].forEach(lvl => {
+    const btn = document.getElementById(`level-${lvl}`);
+    if (!btn) return;
+    if (lvl === level) {
+      btn.style.borderColor = 'var(--accent)';
+      btn.style.background  = 'rgba(var(--accent-rgb),0.12)';
+      btn.style.color       = 'var(--accent)';
+    } else {
+      btn.style.borderColor = 'var(--border)';
+      btn.style.background  = 'var(--bg-card2)';
+      btn.style.color       = 'var(--text-muted)';
+    }
+  });
+}
+
+// ── Save skills ──────────────────────────────────────────────────────────────
+async function saveSkills() {
+  const btn = document.getElementById('skillsBtn');
+  const msg = document.getElementById('skillsMsg');
+  const experienceLevel = document.getElementById('selectedLevel')?.value || 'intermediate';
 
   btn.disabled = true;
   btn.textContent = 'Saving...';
   msg.classList.add('hidden');
 
-  const formData = new FormData();
-  formData.append('displayName', displayName);
-  if (selectedFile) formData.append('avatar', selectedFile);
-
   try {
-    const res = await fetch('/profile/update', {
+    const res = await fetch('/profile/skills', {
       method: 'POST',
-      body: formData,
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        skills: [...selectedSkills].join(','),
+        experienceLevel,
+      }),
     });
     const data = await res.json();
     if (data.success) {
-      showToast('✅ Profile saved!', 'success');
-      msg.textContent = '✅ Profile updated successfully!';
+      showToast('✅ Skills saved! Dashboard personalized.', 'success');
+      msg.textContent = '✅ Skills saved! Your dashboard is now personalized.';
       msg.style.color = 'var(--success)';
       msg.classList.remove('hidden');
-      setTimeout(() => location.reload(), 1200);
+      setTimeout(() => { window.location.href = '/'; }, 1500);
     } else {
-      msg.textContent = data.message || 'Something went wrong.';
+      msg.textContent = data.message || 'Error saving skills.';
       msg.style.color = 'var(--danger)';
       msg.classList.remove('hidden');
     }
-  } catch(err) {
+  } catch (e) {
     msg.textContent = 'Connection error. Please try again.';
     msg.style.color = 'var(--danger)';
     msg.classList.remove('hidden');
   }
-
   btn.disabled = false;
-  btn.textContent = 'Save Profile';
+  btn.textContent = '💾 Save Skills & Personalize Dashboard';
 }
+
+// ── Avatar upload ────────────────────────────────────────────────────────────
+let selectedFile = null;
+function previewAvatar(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { showToast('Image too large. Max 2MB.', 'error'); return; }
+  selectedFile = file;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('avatarCircle').innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover" />`;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveProfile() {
+  const displayName = document.getElementById('displayName')?.value.trim() || '';
+  const btn = document.getElementById('saveBtn');
+  const msg = document.getElementById('saveMsg');
+  btn.disabled = true; btn.textContent = 'Saving...'; msg.classList.add('hidden');
+  const formData = new FormData();
+  formData.append('displayName', displayName);
+  if (selectedFile) formData.append('avatar', selectedFile);
+  try {
+    const res  = await fetch('/profile/update', { method: 'POST', body: formData });
+    const data = await res.json();
+    if (data.success) {
+      showToast('✅ Profile saved!', 'success');
+      msg.textContent = '✅ Updated!'; msg.style.color = 'var(--success)'; msg.classList.remove('hidden');
+      setTimeout(() => location.reload(), 1200);
+    } else {
+      msg.textContent = data.message || 'Error.'; msg.style.color = 'var(--danger)'; msg.classList.remove('hidden');
+    }
+  } catch(e) {
+    msg.textContent = 'Connection error.'; msg.style.color = 'var(--danger)'; msg.classList.remove('hidden');
+  }
+  btn.disabled = false; btn.textContent = 'Save Wallet Profile';
+}
+
+// Init
+renderSelectedSkills();
 </script>
 
 <%- include('partials/footer') %>

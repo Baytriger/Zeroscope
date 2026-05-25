@@ -42,6 +42,7 @@
       --text-muted:   #94a3b8;
       --text-dim:     #64748b;
       --accent:       #22d3ee;
+      --accent-rgb:   34,211,238;
       --accent-glow:  rgba(34, 211, 238, 0.25);
       --accent2:      #0ea5e9;
       --hot:          #f59e0b;
@@ -60,6 +61,7 @@
       --text-muted:   #475569;
       --text-dim:     #94a3b8;
       --accent:       #0891b2;
+      --accent-rgb:   8,145,178;
       --accent-glow:  rgba(8, 145, 178, 0.15);
       --accent2:      #0369a1;
       --hot:          #d97706;
@@ -346,7 +348,7 @@
       <div class="flex items-center gap-2 sm:gap-3">
 
         <!-- X (Twitter) Social -->
-        <a href="https://x.com/ZeroScopeHQ" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--accent-glow)]" style="border:1px solid var(--border);color:var(--text-muted);" title="Follow @ZeroScopeHQ on X" aria-label="X / Twitter">
+        <a href="https://x.com/ZeroScopeHQ" target="_blank" rel="noopener noreferrer" class="hidden sm:flex w-9 h-9 rounded-lg items-center justify-center transition-colors hover:bg-[var(--accent-glow)]" style="border:1px solid var(--border);color:var(--text-muted);" title="Follow @ZeroScopeHQ on X" aria-label="X / Twitter">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.763l7.659-8.741L1.928 2.25h6.927l4.346 5.739zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         </a>
 
@@ -398,6 +400,23 @@
           </div>
         </div>
 
+        <!-- Auth -->
+        <% if (typeof userId !== 'undefined' && userId) { %>
+        <div class="flex items-center gap-2">
+          <span style="font-size:0.8rem;color:var(--text-muted);font-family:'Syne',sans-serif;font-weight:600;" class="hidden sm:inline">👤 <%= username %></span>
+          <form action="/auth/logout" method="POST" style="display:inline;">
+            <button type="submit" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors" style="border:1px solid var(--border);color:var(--text-muted);background:transparent;font-family:'Syne',sans-serif;cursor:pointer;" onmouseover="this.style.borderColor='var(--danger)';this.style.color='var(--danger)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
+              Sign Out
+            </button>
+          </form>
+        </div>
+        <% } else { %>
+        <div class="flex items-center gap-2">
+          <a href="/auth/login" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors hidden sm:inline-block" style="border:1px solid var(--border);color:var(--text-muted);font-family:'Syne',sans-serif;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">Sign In</a>
+          <a href="/auth/register" class="btn-accent px-3 py-1.5 text-xs hidden sm:inline-block" style="border-radius:8px;">Register</a>
+        </div>
+        <% } %>
+
         <!-- Wallet -->
         <div id="walletWrapper">
           <% if (typeof walletAddress !== 'undefined' && walletAddress) { %>
@@ -426,6 +445,22 @@
         <a href="/" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Syne',sans-serif;color:var(--text-muted);">🏠 Opportunities</a>
         <a href="/bookmarks" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Syne',sans-serif;color:var(--text-muted);">🔖 Bookmarks</a>
         <a href="/profile" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Syne',sans-serif;color:var(--text-muted);">👤 Profile</a>
+
+        <a href="https://x.com/ZeroScopeHQ" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Syne',sans-serif;color:var(--text-muted);">🐦 Follow @ZeroScopeHQ</a>
+
+        <div style="height:1px;background:var(--border);margin:6px 0;"></div>
+
+        <% if (typeof userId !== 'undefined' && userId) { %>
+        <div class="px-4 py-2 flex items-center justify-between">
+          <span style="font-size:0.875rem;color:var(--text-muted);font-family:'Syne',sans-serif;">👤 <%= username %></span>
+          <form action="/auth/logout" method="POST">
+            <button type="submit" style="font-size:0.8rem;color:#f87171;font-family:'Syne',sans-serif;font-weight:600;background:none;border:none;cursor:pointer;">Sign Out</button>
+          </form>
+        </div>
+        <% } else { %>
+        <a href="/auth/login" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Syne',sans-serif;color:var(--text-muted);">🔑 Sign In</a>
+        <a href="/auth/register" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Syne',sans-serif;color:var(--accent);">✨ Create Account</a>
+        <% } %>
       </div>
     </div>
   </div>
