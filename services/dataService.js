@@ -86,24 +86,67 @@ async function fetchZeroAuthority() {
       const items = res.data?.data || res.data?.bounties || res.data?.gigs || res.data?.jobs || res.data?.events || res.data || [];
       if (Array.isArray(items) && items.length > 0) {
         console.log(`✅ ZA API hit: ${ep.url} (${items.length} items)`);
-        items.forEach(item => results.push({
-          id: `za-${item.id || item._id || item.slug}`,
-          title: item.title || item.name,
-          description: item.description || item.summary || '',
-          category: ep.cat,
-          source: 'Zero Authority DAO',
-          sourceUrl: item.url || item.link || item.externalUrl ||
-            `https://zeroauthoritydao.com/${ep.cat === 'job' ? 'jobs' : ep.cat === 'bounty' ? 'bounty' : ep.cat}`,
-          reward: item.reward || item.rewardAmount || item.amount || 'TBD',
-          rewardToken: item.rewardToken || item.currency || item.token || 'STX',
-          deadline: item.deadline || item.endDate || item.expiresAt || null,
-          tags: Array.isArray(item.tags) ? item.tags : (item.skills?.map(s => s.skill || s) || []),
-          difficulty: item.difficulty || 'intermediate',
-          applicants: item.applicants || item.submissions || item.totalSubmissions || 0,
-          isHot: item.featured || item.isHot || false,
-          createdAt: item.createdAt || new Date().toISOString(),
-          raw: {},
-        }));
+        items.forEach(item => {
+          // Safely extract reward — may be object, number, or string
+          const rawReward = item.rewardAmount || item.reward || item.amount || item.prize;
+          let reward = 'TBD';
+          if (rawReward !== null && rawReward !== undefined) {
+            if (typeof rawReward === 'object') {
+              reward = rawReward.amount || rawReward.value || rawReward.total || String(rawReward.usd || rawReward.usdc || 'TBD');
+            } else {
+              reward = String(rawReward);
+            }
+          }
+
+          // Safely extract rewardToken
+          const rawToken = item.rewardToken || item.token || item.currency;
+          let rewardToken = 'STX';
+          if (rawToken) {
+            rewardToken = typeof rawToken === 'object' ? (rawToken.symbol || rawToken.name || 'STX') : String(rawToken);
+          }
+
+          // Safely extract tags — may be array of strings or array of objects
+          let tags = [];
+          const rawTags = item.tags || item.skills || item.categories || [];
+          if (Array.isArray(rawTags)) {
+            tags = rawTags.map(t => {
+              if (typeof t === 'string') return t;
+              if (typeof t === 'object') return t.skill || t.name || t.label || t.tag || '';
+              return '';
+            }).filter(Boolean);
+          }
+
+          // Safely extract applicants
+          const rawApplicants = item.totalSubmissions || item.submissions || item.applicants || item.applicantCount || 0;
+          const applicants = typeof rawApplicants === 'object' ? (rawApplicants.count || rawApplicants.total || 0) : Number(rawApplicants) || 0;
+
+          // Safely extract deadline
+          const deadline = item.deadline || item.endDate || item.expiresAt || item.closingDate || null;
+
+          // Safely extract sourceUrl
+          const sourceUrl = (typeof item.url === 'string' ? item.url : null)
+            || (typeof item.link === 'string' ? item.link : null)
+            || (typeof item.externalUrl === 'string' ? item.externalUrl : null)
+            || `https://zeroauthoritydao.com/${ep.cat === 'job' ? 'jobs' : ep.cat === 'bounty' ? 'bounty' : ep.cat}`;
+
+          results.push({
+            id: `za-${item.id || item._id || item.slug}`,
+            title: String(item.title || item.name || 'Untitled'),
+            description: String(item.description || item.summary || item.shortDescription || ''),
+            category: ep.cat,
+            source: 'Zero Authority DAO',
+            sourceUrl,
+            reward,
+            rewardToken,
+            deadline,
+            tags,
+            difficulty: String(item.difficulty || item.level || 'intermediate'),
+            applicants,
+            isHot: !!(item.featured || item.isHot || item.isFeatured || false),
+            createdAt: item.createdAt || new Date().toISOString(),
+            raw: {},
+          });
+        });
       }
     } catch (err) {
       console.warn(`⚠️  ZA endpoint ${ep.url} failed:`, err.message);

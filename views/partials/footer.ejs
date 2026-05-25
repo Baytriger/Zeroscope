@@ -226,10 +226,10 @@ document.addEventListener('keydown', function(e) {
 </script>
 
 <!-- AI Chat Floating Button -->
-<div class="fixed bottom-6 left-6 z-40 flex flex-col items-start gap-3">
+<div class="fixed z-40 flex flex-col items-start gap-3" style="bottom:1.25rem;left:1rem;">
   <!-- Chat Panel -->
-  <div id="chatPanel" class="card hidden fade-in" style="width:340px;max-width:calc(100vw - 48px);box-shadow:0 20px 60px rgba(0,0,0,0.5);">
-    <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--border);">
+  <div id="chatPanel" class="card hidden fade-in" style="width:min(340px,calc(100vw - 2rem));max-height:min(420px,60vh);display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+    <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--border);flex-shrink:0;">
       <div class="flex items-center gap-2">
         <div class="w-8 h-8 rounded-full flex items-center justify-center text-base" style="background:linear-gradient(135deg,var(--accent),var(--accent2));">🔭</div>
         <div>
@@ -237,10 +237,10 @@ document.addEventListener('keydown', function(e) {
           <div style="font-size:0.7rem;color:var(--success);">● Online</div>
         </div>
       </div>
-      <button onclick="toggleChat()" style="color:var(--text-muted);">✕</button>
+      <button onclick="toggleChat()" style="color:var(--text-muted);font-size:1.1rem;padding:4px 8px;">✕</button>
     </div>
-    <div id="chatMessages" class="flex flex-col gap-3 p-4 overflow-y-auto" style="height:280px;"></div>
-    <div class="p-3" style="border-top:1px solid var(--border);">
+    <div id="chatMessages" class="flex flex-col gap-3 p-4 overflow-y-auto" style="flex:1;min-height:0;"></div>
+    <div class="p-3" style="border-top:1px solid var(--border);flex-shrink:0;">
       <div class="flex gap-2">
         <input id="chatInput" type="text" placeholder="Ask ZERO about opportunities..." class="zs-input" style="font-size:0.85rem;padding:8px 12px;" />
         <button onclick="sendChat()" class="btn-accent px-3 flex-shrink-0" style="padding:8px 14px;">

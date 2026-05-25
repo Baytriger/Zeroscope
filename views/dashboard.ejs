@@ -110,7 +110,7 @@
     </div>
     <div class="flex gap-4 overflow-x-auto pb-3" style="scrollbar-width:thin;">
       <% hotOpportunities.forEach(function(op, i) { %>
-      <div class="card flex-shrink-0 p-4 fade-in" style="width:280px;animation-delay:<%= i * 80 %>ms;">
+      <div class="card flex-shrink-0 p-4 fade-in" style="width:min(280px, 80vw);animation-delay:<%= i * 80 %>ms;">
         <div class="flex items-start justify-between mb-3">
           <span class="badge badge-<%= op.category %>"><%= op.category %></span>
           <span class="badge badge-hot hot-badge">🔥 Hot</span>

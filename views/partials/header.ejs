@@ -313,8 +313,38 @@
 
     /* ── Mobile responsive helpers ───────────────────────────────────────── */
     @media (max-width: 640px) {
-      .stat-value { font-size: 1.5rem; }
-      .notif-panel { width: calc(100vw - 24px); right: -12px; }
+      .stat-value { font-size: 1.4rem; }
+      .stat-card  { padding: 12px 14px; }
+      .notif-panel { width: calc(100vw - 24px); right: -60px; }
+
+      /* Cards full width on mobile */
+      .card { border-radius: 14px; }
+
+      /* Filter tabs scrollable */
+      .filter-tab { font-size: 0.78rem; padding: 7px 14px; }
+
+      /* Badge font size */
+      .badge { font-size: 0.65rem; }
+
+      /* Wallet modal full width on mobile */
+      #walletModal > div { margin: 12px; width: calc(100vw - 24px) !important; max-width: 100% !important; }
+
+      /* Chat bubble width on mobile */
+      .chat-bubble-user, .chat-bubble-ai { max-width: 90% !important; }
+
+      /* Footer text wrap */
+      footer .flex { flex-direction: column; text-align: center; gap: 8px; }
+
+      /* Auth pages */
+      .auth-card { padding: 24px 20px !important; }
+
+      /* Inputs full width */
+      .zs-input, .zs-select { font-size: 16px !important; } /* prevents iOS zoom */
+    }
+
+    @media (max-width: 400px) {
+      .stat-value { font-size: 1.2rem; }
+      h1 { font-size: 1.6rem !important; }
     }
 
     /* ── Fade in animation ───────────────────────────────────────────────── */
@@ -495,4 +525,4 @@
 </div>
 
 <!-- Toast Container -->
-<div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2" style="max-width:320px;"></div>
+<div id="toastContainer" class="fixed bottom-6 right-4 z-50 flex flex-col gap-2" style="max-width:min(320px,calc(100vw - 2rem));"></div>
