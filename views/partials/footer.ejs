@@ -171,7 +171,14 @@ let chatOpen = false;
 function toggleChat() {
   const panel = document.getElementById('chatPanel');
   chatOpen = !chatOpen;
-  panel.classList.toggle('hidden', !chatOpen);
+  if (chatOpen) {
+    panel.classList.remove('hidden');
+    panel.style.display = 'flex';
+    panel.style.flexDirection = 'column';
+  } else {
+    panel.style.display = '';
+    panel.classList.add('hidden');
+  }
   if (chatOpen && chatHistory.length === 0) {
     appendChatMessage('ai', '👋 Hey! I\'m ZERO, your Web3 opportunity advisor. Tell me your skills or what you\'re looking for, and I\'ll find the best opportunities for you!');
   }
@@ -228,7 +235,7 @@ document.addEventListener('keydown', function(e) {
 <!-- AI Chat Floating Button -->
 <div class="fixed z-40 flex flex-col items-start gap-3" style="bottom:1.25rem;left:1rem;">
   <!-- Chat Panel -->
-  <div id="chatPanel" class="card hidden fade-in" style="width:min(340px,calc(100vw - 2rem));max-height:min(420px,60vh);display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+  <div id="chatPanel" class="card hidden fade-in" style="width:min(340px,calc(100vw - 2rem));max-height:min(420px,60vh);box-shadow:0 20px 60px rgba(0,0,0,0.5);">
     <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--border);flex-shrink:0;">
       <div class="flex items-center gap-2">
         <div class="w-8 h-8 rounded-full flex items-center justify-center text-base" style="background:linear-gradient(135deg,var(--accent),var(--accent2));">🔭</div>

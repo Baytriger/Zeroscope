@@ -85,8 +85,11 @@ async function fetchZeroAuthority() {
       const res = await axios.get(ep.url, { timeout: 8000, headers: { 'Accept': 'application/json' } });
       const items = res.data?.data || res.data?.bounties || res.data?.gigs || res.data?.jobs || res.data?.events || res.data || [];
       if (Array.isArray(items) && items.length > 0) {
-        console.log(`✅ ZA API hit: ${ep.url} (${items.length} items)`);
+        console.log(`✅ ZA API hit: ${ep.url} (${items.length} items) — sample:`, JSON.stringify(items[0]).slice(0, 300));
         items.forEach(item => {
+          // Skip blank/invalid entries
+          const title = String(item.title || item.name || '').trim();
+          if (!title || title === 'undefined' || title === 'null') return;
           // Safely extract reward — may be object, number, or string
           const rawReward = item.rewardAmount || item.reward || item.amount || item.prize;
           let reward = 'TBD';
@@ -123,11 +126,15 @@ async function fetchZeroAuthority() {
           // Safely extract deadline
           const deadline = item.deadline || item.endDate || item.expiresAt || item.closingDate || null;
 
-          // Safely extract sourceUrl
-          const sourceUrl = (typeof item.url === 'string' ? item.url : null)
-            || (typeof item.link === 'string' ? item.link : null)
-            || (typeof item.externalUrl === 'string' ? item.externalUrl : null)
-            || `https://zeroauthoritydao.com/${ep.cat === 'job' ? 'jobs' : ep.cat === 'bounty' ? 'bounty' : ep.cat}`;
+          // Safely extract sourceUrl — try slug-based URL first
+          const rawSlug = item.slug || item.id || item._id;
+          const baseUrl = ep.cat === 'job' ? 'https://zeroauthoritydao.com/jobs'
+                        : ep.cat === 'grant' ? 'https://zeroauthoritydao.com/funding/degrants'
+                        : 'https://zeroauthoritydao.com/bounty';
+          const sourceUrl = (typeof item.url === 'string' && item.url.startsWith('http') ? item.url : null)
+            || (typeof item.link === 'string' && item.link.startsWith('http') ? item.link : null)
+            || (typeof item.externalUrl === 'string' && item.externalUrl.startsWith('http') ? item.externalUrl : null)
+            || (rawSlug ? `${baseUrl}/${rawSlug}` : baseUrl);
 
           results.push({
             id: `za-${item.id || item._id || item.slug}`,
@@ -219,7 +226,7 @@ async function fetchAllOpportunities() {
     ...(zaRes.status  === 'fulfilled' ? zaRes.value  : []),
     ...(stRes.status  === 'fulfilled' ? stRes.value  : []),
     ...(w3cRes.status === 'fulfilled' ? w3cRes.value : []),
-  ];
+  ].filter(op => op.title && op.title.trim() && op.title !== 'undefined');
 
   const mock = getMockData();
 
