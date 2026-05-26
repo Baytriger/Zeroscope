@@ -243,3 +243,23 @@ router.get('/opportunities', async (req, res) => {
 });
 
 module.exports = router;
+
+// GET /api/debug-za — see raw ZA API response (remove after debugging)
+router.get('/debug-za', async (req, res) => {
+  try {
+    const axios = require('axios');
+    const result = await axios.get('https://zeroauthoritydao.com/api/bounties', {
+      timeout: 8000,
+      headers: { 'Accept': 'application/json' }
+    });
+    const items = result.data?.data || result.data || [];
+    // Return first 3 items with ALL fields
+    res.json({ 
+      total: items.length,
+      sample: items.slice(0, 3),
+      firstItemKeys: items[0] ? Object.keys(items[0]) : []
+    });
+  } catch (err) {
+    res.json({ error: err.message });
+  }
+});

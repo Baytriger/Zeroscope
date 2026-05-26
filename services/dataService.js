@@ -249,21 +249,35 @@ async function fetchAllOpportunities() {
 
   const mock = getMockData();
 
-  // Deduplicate: remove mock entries whose title already exists in live data
-  const liveTitles = new Set(live.map(o => o.title.toLowerCase().trim()));
-  const mockFill = mock.filter(o => !liveTitles.has(o.title.toLowerCase().trim()));
-
-  // Filter out junk live ZA entries: single-word titles, test entries, no title
-  const junkTitles = new Set(['test', 'developer', 'community', 'design', 'marketing', 'development', 'bootspring', 'protocol updates', 'protocol infrastructure']);
+  // Filter out junk live ZA entries first
+  const junkPatterns = /^(test|developer|community|design|marketing|development|bootspring|protocol updates|protocol infrastructure|graphic design|community\s*)$/i;
   const cleanLive = live.filter(op => {
-    const t = op.title.toLowerCase().trim();
-    if (junkTitles.has(t)) return false;
+    if (op.source !== 'Zero Authority DAO') return true;
+    const t = op.title.trim();
+    if (junkPatterns.test(t)) return false;
     if (t.length < 5) return false;
-    if (op.source === 'Zero Authority DAO' && !op.description && (!op.tags || op.tags.length === 0) && op.reward === 'TBD') return false;
+    if (!op.description && (!op.tags || op.tags.length === 0) && op.reward === 'TBD') return false;
     return true;
   });
 
-  const all = [...cleanLive, ...mockFill];
+  // Merge live + mock, deduplicating by title
+  // For duplicates: prefer whichever has more data (reward, description, tags)
+  const score = (op) => (op.reward !== 'TBD' ? 10 : 0) + (op.description && op.description.length > 30 ? 5 : 0) + (op.tags?.length > 0 ? 3 : 0) + (op.sourceUrl?.includes('/bounty/') ? 2 : 0);
+
+  const seen = new Map(); // normalised title → best entry so far
+  [...cleanLive, ...mock].forEach(op => {
+    const key = op.title.toLowerCase().trim().replace(/\s+/g, ' ');
+    if (!seen.has(key)) {
+      seen.set(key, op);
+    } else {
+      // Keep whichever has a better score
+      if (score(op) > score(seen.get(key))) {
+        seen.set(key, op);
+      }
+    }
+  });
+
+  const all = [...seen.values()];
 
   return all.map(op => ({ ...op, isHot: op.isHot || (op.applicants || 0) > 20 }));
 }
