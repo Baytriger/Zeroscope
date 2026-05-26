@@ -170,7 +170,7 @@ async function fetchZeroAuthority() {
             applicants,
             isHot: !!(item.featured || item.isHot || item.isFeatured || false),
             createdAt: item.createdAt || new Date().toISOString(),
-            raw: {},
+            raw: item, // keep full raw response for debugging
           });
         });
       }
