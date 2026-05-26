@@ -150,9 +150,10 @@ async function saveBookmark(btn, data) {
 function updateCountdowns() {
   document.querySelectorAll('[data-deadline]').forEach(el => {
     const deadline = new Date(el.dataset.deadline);
+    if (isNaN(deadline.getTime())) { el.textContent = ''; return; } // invalid date — hide
     const now = new Date();
     const diff = deadline - now;
-    if (diff <= 0) { el.textContent = 'Expired'; el.className = el.className.replace(/countdown\w*/g, '') + ' countdown urgent'; return; }
+    if (diff <= 0) { el.textContent = '⚠️ Expired'; el.className = 'countdown urgent'; return; }
     const days = Math.floor(diff / 86400000);
     const hrs  = Math.floor((diff % 86400000) / 3600000);
     const mins = Math.floor((diff % 3600000) / 60000);

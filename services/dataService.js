@@ -85,7 +85,10 @@ async function fetchZeroAuthority() {
       const res = await axios.get(ep.url, { timeout: 8000, headers: { 'Accept': 'application/json' } });
       const items = res.data?.data || res.data?.bounties || res.data?.gigs || res.data?.jobs || res.data?.events || res.data || [];
       if (Array.isArray(items) && items.length > 0) {
-        console.log(`✅ ZA API hit: ${ep.url} (${items.length} items) — sample:`, JSON.stringify(items[0]).slice(0, 300));
+        const sample = items[0];
+        console.log(`✅ ZA API hit: ${ep.url} (${items.length} items)`);
+        console.log(`ZA SAMPLE KEYS: ${Object.keys(sample).join(', ')}`);
+        console.log(`ZA SAMPLE VALUES: reward=${JSON.stringify(sample.reward || sample.rewardAmount || sample.amount || sample.prize)}, token=${JSON.stringify(sample.rewardToken || sample.token || sample.currency || sample.tokenSymbol)}, deadline=${JSON.stringify(sample.deadline || sample.endDate || sample.expiresAt || sample.dueDate || sample.closingDate)}, tags=${JSON.stringify(sample.tags || sample.skills || sample.categories)}, applicants=${JSON.stringify(sample.applicants || sample.totalSubmissions || sample.submissions || sample.applicantCount)}, difficulty=${JSON.stringify(sample.difficulty || sample.level || sample.experienceLevel)}`);
         items.forEach(item => {
           // Skip blank/invalid entries
           const title = String(item.title || item.name || '').trim();
@@ -123,8 +126,24 @@ async function fetchZeroAuthority() {
           const rawApplicants = item.totalSubmissions || item.submissions || item.applicants || item.applicantCount || 0;
           const applicants = typeof rawApplicants === 'object' ? (rawApplicants.count || rawApplicants.total || 0) : Number(rawApplicants) || 0;
 
-          // Safely extract deadline
-          const deadline = item.deadline || item.endDate || item.expiresAt || item.closingDate || null;
+          // Skip expired entries (deadline in the past)
+          if (deadline && new Date(deadline) < new Date()) return;
+
+          // Generate tags from title/description if API returns none
+          if (tags.length === 0) {
+            const text = (title + ' ' + String(item.description || '')).toLowerCase();
+            const autoTags = [];
+            if (/content|writing|article|blog|thread|clip/.test(text)) autoTags.push('Content');
+            if (/design|graphic|visual|ui|ux/.test(text)) autoTags.push('Design');
+            if (/dev|code|build|smart contract|solidity|rust/.test(text)) autoTags.push('Development');
+            if (/market|growth|social|twitter|community/.test(text)) autoTags.push('Marketing');
+            if (/video|animation|film|clip/.test(text)) autoTags.push('Video');
+            if (/meme|funny|humor/.test(text)) autoTags.push('Meme');
+            if (/governance|dao|vote|sip/.test(text)) autoTags.push('Governance');
+            if (/bounty/.test(text)) autoTags.push('Bounty');
+            if (autoTags.length === 0) autoTags.push('General');
+            tags = autoTags;
+          }
 
           // Safely extract sourceUrl — try slug-based URL first
           const rawSlug = item.slug || item.id || item._id;
@@ -230,11 +249,21 @@ async function fetchAllOpportunities() {
 
   const mock = getMockData();
 
-  // Always include mock data, but deduplicate by id
-  // Live API data takes priority; mock fills in missing categories
-  const liveIds = new Set(live.map(o => o.id));
-  const mockFill = mock.filter(o => !liveIds.has(o.id));
-  const all = [...live, ...mockFill];
+  // Deduplicate: remove mock entries whose title already exists in live data
+  const liveTitles = new Set(live.map(o => o.title.toLowerCase().trim()));
+  const mockFill = mock.filter(o => !liveTitles.has(o.title.toLowerCase().trim()));
+
+  // Filter out junk live ZA entries: single-word titles, test entries, no title
+  const junkTitles = new Set(['test', 'developer', 'community', 'design', 'marketing', 'development', 'bootspring', 'protocol updates', 'protocol infrastructure']);
+  const cleanLive = live.filter(op => {
+    const t = op.title.toLowerCase().trim();
+    if (junkTitles.has(t)) return false;
+    if (t.length < 5) return false;
+    if (op.source === 'Zero Authority DAO' && !op.description && (!op.tags || op.tags.length === 0) && op.reward === 'TBD') return false;
+    return true;
+  });
+
+  const all = [...cleanLive, ...mockFill];
 
   return all.map(op => ({ ...op, isHot: op.isHot || (op.applicants || 0) > 20 }));
 }
