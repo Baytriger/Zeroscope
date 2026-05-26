@@ -72,7 +72,7 @@ async function fetchZeroAuthority() {
       const token  = item.token?.symbol || 'STX';
       const tags   = item.category?.name ? [item.category.name] : [];
       const desc   = String(item.details || '').replace(/
-/g, '
+/[\r/n]+/g, '
 ').slice(0, 500);
       results.push({
         id: `za-${item.id}`,
