@@ -187,15 +187,7 @@ async function fetchZeroAuthority() {
 function getMockData() {
   const d = (days) => new Date(Date.now() + days * 86400000).toISOString();
   return [
-    // Zero Authority Bounties
-    { id:'za-b1', title:'ZA x 3HUNNA CLIPPING BOUNTY', description:'Create clips and highlight content for 3HUNNA on the Stacks Network. Multiple winners. Marketing focused.', category:'bounty', source:'Zero Authority DAO', sourceUrl:'https://zeroauthoritydao.com/bounty', reward:'TBD', rewardToken:'STX', deadline:d(7),  tags:['Marketing','Content','Clipping','Stacks'], difficulty:'beginner',     applicants:18, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
-    { id:'za-b2', title:'USDA Alpha Arena',              description:'Participate in the USDA Alpha Arena on the Stacks Network. Multiple winners. General category by DIKO Creators.', category:'bounty', source:'Zero Authority DAO', sourceUrl:'https://zeroauthoritydao.com/bounty', reward:'TBD', rewardToken:'USDA',deadline:d(14), tags:['DeFi','USDA','Stacks'],              difficulty:'intermediate', applicants:24, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
-    { id:'za-b3', title:'THE $FLAT FRENZY BOUNTY',      description:'Join the $FLAT Frenzy bounty on Stacks. Multiple winners. Show creativity and passion for the Flat Earth project.', category:'bounty', source:'Zero Authority DAO', sourceUrl:'https://zeroauthoritydao.com/bounty', reward:'TBD', rewardToken:'FLAT',deadline:d(4),  tags:['General','Stacks','Community'],      difficulty:'beginner',     applicants:31, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
-    { id:'za-b4', title:'The Top Dawg Award',            description:'Single winner bounty by Dawgcoin on Stacks. Prove you are the top dawg.', category:'bounty', source:'Zero Authority DAO', sourceUrl:'https://zeroauthoritydao.com/bounty', reward:'TBD', rewardToken:'DAWG',deadline:d(13), tags:['General','Stacks'],                  difficulty:'beginner',     applicants:9,  isHot:false, createdAt:new Date().toISOString(), raw:{} },
-    { id:'za-b5', title:"Ruffs-to-Riches — Part Two",   description:'Multiple winners by Dawgcoin. Continue the Ruffs-to-Riches story on Stacks.', category:'bounty', source:'Zero Authority DAO', sourceUrl:'https://zeroauthoritydao.com/bounty', reward:'TBD', rewardToken:'DAWG',deadline:d(18), tags:['Content','General','Stacks'],        difficulty:'beginner',     applicants:14, isHot:false, createdAt:new Date().toISOString(), raw:{} },
-    { id:'za-b6', title:'Megapont Lets Go Ape',          description:'Single winner meme bounty by Creators Campaign. Best meme for the Megapont community on Stacks.', category:'bounty', source:'Zero Authority DAO', sourceUrl:'https://zeroauthoritydao.com/bounty', reward:'TBD', rewardToken:'STX', deadline:d(4),  tags:['Meme','NFT','Stacks'],              difficulty:'beginner',     applicants:22, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
-    { id:'za-b7', title:"Ruffs-to-Riches — Part One",   description:'Multiple winners by Dawgcoin. Kick off the series on Stacks with your best content.', category:'bounty', source:'Zero Authority DAO', sourceUrl:'https://zeroauthoritydao.com/bounty', reward:'TBD', rewardToken:'DAWG',deadline:d(13), tags:['Content','General','Stacks'],        difficulty:'beginner',     applicants:19, isHot:false, createdAt:new Date().toISOString(), raw:{} },
-
+    // Zero Authority Bounties — removed from mock, now pulled live from ZA API
     // Zero Authority DeGrants
     { id:'za-g1', title:'DeGrants — Developers & Builders', description:'Build tools, apps, and infrastructure that make Stacks better for everyone. Submit a proposal for funding.', category:'grant', source:'Zero Authority DAO', sourceUrl:'https://zeroauthoritydao.com/funding/degrants', reward:'Varies', rewardToken:'STX', deadline:null, tags:['Development','Infrastructure','Stacks'], difficulty:'intermediate', applicants:44, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
     { id:'za-g2', title:'DeGrants — DeFi Track',            description:'Create financial products that give people more control over their money on Stacks.',                          category:'grant', source:'Zero Authority DAO', sourceUrl:'https://zeroauthoritydao.com/funding/projects?track=defi', reward:'Varies', rewardToken:'STX', deadline:null, tags:['DeFi','Finance','Stacks'],            difficulty:'advanced',     applicants:28, isHot:false, createdAt:new Date().toISOString(), raw:{} },
@@ -278,7 +270,11 @@ async function fetchAllOpportunities() {
     }
   });
 
-  const all = [...seen.values()];
+  const all = [...seen.values()].filter(op => {
+    // Filter expired — check deadline date
+    if (op.deadline && new Date(op.deadline) < new Date()) return false;
+    return true;
+  });
 
   return all.map(op => ({ ...op, isHot: op.isHot || (op.applicants || 0) > 20 }));
 }
