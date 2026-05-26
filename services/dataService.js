@@ -90,8 +90,8 @@ async function fetchZeroAuthority() {
         console.log(`ZA SAMPLE KEYS: ${Object.keys(sample).join(', ')}`);
         console.log(`ZA SAMPLE VALUES: reward=${JSON.stringify(sample.reward || sample.rewardAmount || sample.amount || sample.prize)}, token=${JSON.stringify(sample.rewardToken || sample.token || sample.currency || sample.tokenSymbol)}, deadline=${JSON.stringify(sample.deadline || sample.endDate || sample.expiresAt || sample.dueDate || sample.closingDate)}, tags=${JSON.stringify(sample.tags || sample.skills || sample.categories)}, applicants=${JSON.stringify(sample.applicants || sample.totalSubmissions || sample.submissions || sample.applicantCount)}, difficulty=${JSON.stringify(sample.difficulty || sample.level || sample.experienceLevel)}`);
         items.forEach(item => {
-          // Skip blank/invalid entries
-          const title = String(item.title || item.name || '').trim();
+          // Skip blank/invalid entries — ZA uses 'name' not 'title', 'details' not 'description'
+          const title = String(item.name || item.title || '').trim();
           if (!title || title === 'undefined' || title === 'null') return;
           // Safely extract reward — may be object, number, or string
           const rawReward = item.rewardAmount || item.reward || item.amount || item.prize;
@@ -126,7 +126,8 @@ async function fetchZeroAuthority() {
           const rawApplicants = item.totalSubmissions || item.submissions || item.applicants || item.applicantCount || 0;
           const applicants = typeof rawApplicants === 'object' ? (rawApplicants.count || rawApplicants.total || 0) : Number(rawApplicants) || 0;
 
-          // Skip expired entries (deadline in the past)
+          // Skip expired entries — use ZA's own isExpired flag, fallback to deadline check
+          if (item.isExpired === true) return;
           if (deadline && new Date(deadline) < new Date()) return;
 
           // Generate tags from title/description if API returns none
@@ -158,7 +159,7 @@ async function fetchZeroAuthority() {
           results.push({
             id: `za-${item.id || item._id || item.slug}`,
             title: String(item.title || item.name || 'Untitled'),
-            description: String(item.description || item.summary || item.shortDescription || ''),
+            description: String(item.details || item.description || item.summary || item.shortDescription || ''),
             category: ep.cat,
             source: 'Zero Authority DAO',
             sourceUrl,
