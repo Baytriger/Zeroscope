@@ -248,17 +248,24 @@ module.exports = router;
 router.get('/debug-za', async (req, res) => {
   try {
     const axios = require('axios');
-    const result = await axios.get('https://zeroauthoritydao.com/api/bounties', {
-      timeout: 8000,
-      headers: { 'Accept': 'application/json' }
-    });
-    const items = result.data?.data || result.data || [];
-    // Return first 3 items with ALL fields
-    res.json({ 
-      total: items.length,
-      sample: items.slice(0, 3),
-      firstItemKeys: items[0] ? Object.keys(items[0]) : []
-    });
+    const endpoints = ['bounties', 'gigs', 'jobs', 'events', 'grants'];
+    const results = {};
+    for (const ep of endpoints) {
+      try {
+        const r = await axios.get(`https://zeroauthoritydao.com/api/${ep}`, {
+          timeout: 8000, headers: { 'Accept': 'application/json' }
+        });
+        const items = r.data?.data || r.data || [];
+        results[ep] = {
+          count: Array.isArray(items) ? items.length : 'not array',
+          firstItemKeys: Array.isArray(items) && items[0] ? Object.keys(items[0]) : [],
+          sample: Array.isArray(items) ? items[0] : items
+        };
+      } catch(e) {
+        results[ep] = { error: e.message };
+      }
+    }
+    res.json(results);
   } catch (err) {
     res.json({ error: err.message });
   }

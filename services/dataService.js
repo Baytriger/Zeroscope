@@ -38,36 +38,6 @@ async function fetchSuperteam() {
 }
 
 // ── Fetch Web3.career jobs ─────────────────────────────────────────────────
-async function fetchWeb3Career() {
-  try {
-    const res = await axios.get('https://web3.career/api/v1', {
-      params: { job: 1, page: 1 },
-      timeout: 8000,
-      headers: { 'Accept': 'application/json' },
-    });
-    const items = res.data?.jobs || res.data || [];
-    return items.slice(0, 15).map((job, i) => ({
-      id: `w3c-${job.id || i}`,
-      title: job.title || job.job_title,
-      description: job.description || job.short_description || `${job.role || ''} role at ${job.company_name || 'a Web3 company'}`,
-      category: 'job',
-      source: 'Web3.career',
-      sourceUrl: job.url || job.apply_url || `https://web3.career/${job.slug || job.id}`,
-      reward: job.salary_range || job.salary || 'Competitive',
-      rewardToken: 'USD',
-      deadline: null,
-      tags: [job.role, job.location, ...(job.tags || [])].filter(Boolean),
-      difficulty: 'intermediate',
-      applicants: 0,
-      isHot: job.featured || false,
-      createdAt: job.created_at || new Date().toISOString(),
-      raw: {},
-    }));
-  } catch (err) {
-    console.warn('⚠️  Web3.career fetch failed:', err.message);
-    return [];
-  }
-}
 
 // ── Fetch Zero Authority DAO (public API, no key needed) ───────────────────
 async function fetchZeroAuthority() {
@@ -213,13 +183,7 @@ function getMockData() {
     { id:'st-f6', title:'Loofta Pay x MagicBlock — Creator & Content Bounty',     description:'Superteam Ireland bounty for creators to produce content for Loofta Pay and MagicBlock. Multiple formats accepted — threads, videos, articles.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/loofta-pay-x-magicblock-creator-and-content-bounty/',                              reward:'TBD',    rewardToken:'USDC', deadline:d(8),  tags:['Content','Marketing','Solana','Payments'],  difficulty:'beginner',     applicants:22, isHot:false, createdAt:new Date().toISOString(), raw:{} },
     { id:'st-f7', title:'Kazakhstan Solana Projects Spotlight — Content Bounty',   description:'Superteam Kazakhstan wants content spotlighting Solana projects building in Kazakhstan. Writers, designers, and video creators welcome.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/kazakhstan-solana-projects-spotlight-content-bounty/',                                   reward:'TBD',    rewardToken:'USDC', deadline:d(10), tags:['Content','Spotlight','Solana','Community'],  difficulty:'beginner',     applicants:18, isHot:false, createdAt:new Date().toISOString(), raw:{} },
 
-    // Web3.career Jobs — real working category pages
-    { id:'w3c-f1', title:'Remote Solana Developer',              description:'Multiple companies hiring remote Solana developers on Web3.career. Roles span Rust smart contracts, frontend dApps, and protocol engineering.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/remote+solana-jobs',          reward:'$120k–$250k', rewardToken:'USD', deadline:null, tags:['Solana','Rust','Remote','Development'],        difficulty:'expert',        applicants:0, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
-    { id:'w3c-f2', title:'Web3 Community Manager (Remote)',       description:'Fast-growing NFT and DeFi projects seeking community managers for Discord, Twitter, and Telegram. No coding required. Remote positions open now.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/non-tech+remote-jobs',         reward:'$60k–$90k',   rewardToken:'USD', deadline:null, tags:['Community','Discord','Remote','Non-Tech'],     difficulty:'beginner',     applicants:0, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
-    { id:'w3c-f3', title:'Web3 Content Writer / Copywriter',      description:'Write blog posts, documentation, newsletters, and social content for Web3 projects. Remote. Crypto-native voice and research skills required.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/non-tech+remote-jobs',         reward:'$50k–$80k',   rewardToken:'USD', deadline:null, tags:['Writing','Content','Marketing','Remote'],      difficulty:'beginner',     applicants:0, isHot:false, createdAt:new Date().toISOString(), raw:{} },
-    { id:'w3c-f4', title:'Frontend Web3 Engineer (Remote)',        description:'Leading Web3 protocols hiring frontend engineers with React/Next.js experience. Build dApp interfaces, trading dashboards, and wallet UIs.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/web3-jobs-Remote+front-end',    reward:'$90k–$180k',  rewardToken:'USD', deadline:null, tags:['Frontend','React','Remote','DeFi'],            difficulty:'intermediate', applicants:0, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
-    { id:'w3c-f5', title:'Solana Foundation — Business Development', description:'Solana Foundation hiring BD leads for payments and fintech. Drive strategic adoption with major financial institutions and enterprise partners.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/web3-companies/solanafoundation+business-development', reward:'Competitive', rewardToken:'USD', deadline:null, tags:['BD','Solana','Fintech','Non-Tech'],           difficulty:'advanced',     applicants:0, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
-    { id:'w3c-f6', title:'Remote Non-Tech Web3 Jobs',             description:'Browse dozens of open non-technical Web3 roles — marketing, operations, customer support, social media, and more. All remote on Web3.career.', category:'job', source:'Web3.career', sourceUrl:'https://web3.career/non-tech+remote-jobs',         reward:'Varies',      rewardToken:'USD', deadline:null, tags:['Non-Tech','Remote','Marketing','Operations'],  difficulty:'beginner',     applicants:0, isHot:false, createdAt:new Date().toISOString(), raw:{} },
+
 
     // Web3 Foundation Grants
     { id:'w3f-g1', title:'Web3 Foundation Open Grants Program', description:'Web3 Foundation funds open-source projects benefiting the Polkadot and Substrate ecosystem. Grants range from $10k to $100k+. Apply via GitHub.', category:'grant', source:'Web3 Foundation', sourceUrl:'https://grants.web3.foundation/applications', reward:'$10k–$100k+', rewardToken:'USD', deadline:null, tags:['Polkadot','Substrate','Open Source','Infrastructure'], difficulty:'advanced', applicants:0, isHot:false, createdAt:new Date().toISOString(), raw:{} },
@@ -228,16 +192,14 @@ function getMockData() {
 
 // ── Main export ─────────────────────────────────────────────────────────────
 async function fetchAllOpportunities() {
-  const [zaRes, stRes, w3cRes] = await Promise.allSettled([
+  const [zaRes, stRes] = await Promise.allSettled([
     fetchZeroAuthority(),
     fetchSuperteam(),
-    fetchWeb3Career(),
   ]);
 
   const live = [
-    ...(zaRes.status  === 'fulfilled' ? zaRes.value  : []),
-    ...(stRes.status  === 'fulfilled' ? stRes.value  : []),
-    ...(w3cRes.status === 'fulfilled' ? w3cRes.value : []),
+    ...(zaRes.status === 'fulfilled' ? zaRes.value : []),
+    ...(stRes.status === 'fulfilled' ? stRes.value : []),
   ].filter(op => op.title && op.title.trim() && op.title !== 'undefined');
 
   const mock = getMockData();
