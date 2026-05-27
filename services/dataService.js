@@ -71,9 +71,8 @@ async function fetchZeroAuthority() {
       const reward = item.totalPayment || extractAmount(item.reward) || null;
       const token  = item.token?.symbol || 'STX';
       const tags   = item.category?.name ? [item.category.name] : [];
-      const desc   = String(item.details || '').replace(/
-/[\r/n]+/g, '
-').slice(0, 500);
+      const desc   = String(item.details || '').replace(/\r\n/g, ' ').replace(/\n/g, ' ').slice(0, 500);
+
       results.push({
         id: `za-${item.id}`,
         title,
