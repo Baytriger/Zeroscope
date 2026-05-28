@@ -17,7 +17,7 @@
   </div>
 
   <!-- Stats -->
-  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-8">
     <div class="stat-card">
       <div class="stat-value"><%= analytics.total %></div>
       <div class="stat-label">Total</div>
@@ -67,7 +67,7 @@
       const daysLeft = dl ? Math.ceil((dl - now) / 86400000) : null;
     %>
     <div class="card p-5 fade-in" style="animation-delay:<%= i * 50 %>ms;">
-      <div class="flex flex-col sm:flex-row sm:items-start gap-4">
+      <div class="flex flex-col gap-4">
         <!-- Left content -->
         <div class="flex-1 min-w-0">
           <div class="flex flex-wrap items-center gap-2 mb-2">

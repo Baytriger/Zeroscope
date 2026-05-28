@@ -74,6 +74,7 @@
     /* ── Base ────────────────────────────────────────────────────────────── */
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
+    html, body { overflow-x: hidden; }
     body {
       font-family: 'DM Sans', sans-serif;
       font-size: 16px;
@@ -314,7 +315,7 @@
     /* ── Mobile responsive helpers ───────────────────────────────────────── */
     @media (max-width: 640px) {
       .stat-value { font-size: 1.4rem; }
-      .stat-card  { padding: 12px 14px; }
+      .stat-card  { padding: 10px 12px; overflow: hidden; }
       .notif-panel { width: calc(100vw - 24px); right: -60px; }
 
       /* Cards full width on mobile */
@@ -339,7 +340,7 @@
       .auth-card { padding: 24px 20px !important; }
 
       /* Inputs full width */
-      .zs-input, .zs-select { font-size: 16px !important; } /* prevents iOS zoom */
+      .zs-input, .zs-select { font-size: 16px !important; width: 100%; box-sizing: border-box; } /* prevents iOS zoom */
     }
 
     @media (max-width: 400px) {

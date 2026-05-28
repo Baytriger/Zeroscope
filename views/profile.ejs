@@ -26,7 +26,7 @@
   <!-- ── Account Info ── -->
   <% if (loggedInUser) { %>
   <div class="card p-6 mb-6 fade-in">
-    <div class="flex items-center gap-4">
+    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
       <div class="w-16 h-16 rounded-full flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,var(--accent),var(--purple));font-size:1.8rem;">
         <%= loggedInUser.avatar ? '' : '👤' %>
       </div>
