@@ -7,6 +7,7 @@ const methodOverride = require('method-override');
 const morgan = require('morgan');
 const path = require('path');
 const cron = require('node-cron');
+const { getMockData } = require('./services/dataService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,7 +19,7 @@ mongoose.connect(MONGODB_URI)
   .then(() => console.log('MongoDB connected to ZEROSCOPE database'))
   .catch(err => {
     console.error('MongoDB connection error:', err.message);
-    process.exit(1);
+    console.warn('Continuing without MongoDB connection for diagnostics.');
   });
 
 mongoose.connection.on('disconnected', () => console.warn('MongoDB disconnected'));
@@ -81,6 +82,18 @@ cron.schedule('*/30 * * * *', async () => {
   await checkDeadlines();
 });
 
+// Health-check endpoint for quick diagnostics (placed before 404 handler)
+app.get('/health', async (req, res) => {
+  try {
+    const dbState = mongoose.connection.readyState; // 0 disconnected, 1 connected, 2 connecting, 3 disconnecting
+    const sample = (getMockData && typeof getMockData === 'function') ? getMockData() : [];
+    res.json({ ok: true, dbState, sampleCount: Array.isArray(sample) ? sample.length : 0 });
+  } catch (err) {
+    console.error('Health check error:', err && err.stack ? err.stack : err);
+    res.status(500).json({ ok: false, error: err.message || String(err) });
+  }
+});
+
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 app.use((req, res) => {
   res.status(404).render('error', {
@@ -92,12 +105,42 @@ app.use((req, res) => {
 
 // ─── Global Error Handler ─────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
-  console.error('Error:', err.stack);
+  // Enhanced logging for debugging: include request path and session info
+  console.error('Error occurred:', {
+    message: err.message,
+    stack: err.stack,
+    path: req.originalUrl,
+    userId: req.session && req.session.userId ? req.session.userId : null,
+    method: req.method,
+  });
+
   res.status(err.status || 500).render('error', {
     title: 'Server Error — ZEROSCOPE',
     code: err.status || 500,
     message: process.env.NODE_ENV === 'production' ? 'Something went wrong.' : err.message,
   });
+});
+
+// Health-check endpoint for quick diagnostics
+app.get('/health', async (req, res) => {
+  try {
+    const dbState = mongoose.connection.readyState; // 0 disconnected, 1 connected, 2 connecting, 3 disconnecting
+    const sample = (getMockData && typeof getMockData === 'function') ? getMockData() : [];
+    res.json({ ok: true, dbState, sampleCount: Array.isArray(sample) ? sample.length : 0 });
+  } catch (err) {
+    console.error('Health check error:', err && err.stack ? err.stack : err);
+    res.status(500).json({ ok: false, error: err.message || String(err) });
+  }
+});
+
+// Catch unhandled promise rejections and uncaught exceptions to log for diagnostics
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason && reason.stack ? reason.stack : reason);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err && err.stack ? err.stack : err);
+  // Optionally exit process in production: process.exit(1);
 });
 
 // ─── Start Server ─────────────────────────────────────────────────────────────

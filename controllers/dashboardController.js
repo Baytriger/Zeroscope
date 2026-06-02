@@ -112,6 +112,7 @@ exports.getDashboard = async (req, res, next) => {
       hotOpportunities: hotOps,
       recommended,
       analytics,
+      isPersonalized,
       bookmarkIds: [...bookmarkIds],
       savedBookmarks,
       notifications,
