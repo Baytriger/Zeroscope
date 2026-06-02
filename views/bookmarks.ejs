@@ -108,7 +108,7 @@
           <div class="flex flex-wrap items-center gap-4 mt-3">
             <div>
               <span style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1.1rem;color:var(--accent);">
-                <%= isNaN(parseFloat(bm.reward)) ? bm.reward : '$' + parseFloat(bm.reward).toLocaleString() %>
+                <%= isNaN(parseFloat(bm.reward)) ? bm.reward : parseFloat(bm.reward).toLocaleString() %>
               </span>
               <span style="font-size:0.75rem;color:var(--text-muted);margin-left:4px;"><%= bm.rewardToken %></span>
             </div>

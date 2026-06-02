@@ -21,7 +21,7 @@ async function fetchSuperteam() {
       category: item.type === 'job' ? 'job' : item.type === 'grant' ? 'grant' : 'bounty',
       source: 'Superteam Earn',
       sourceUrl: `https://earn.superteam.fun/listing/${item.slug || item.id}`,
-      reward: item.rewardAmount ? `$${Number(item.rewardAmount).toLocaleString()}` : 'TBD',
+        reward: item.rewardAmount ? Number(item.rewardAmount).toLocaleString() : 'TBD',
       rewardToken: item.token || 'USDC',
       deadline: item.deadline || null,
       tags: item.skills?.map(s => s.skill || s) || item.tags || [],
