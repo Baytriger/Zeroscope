@@ -15,14 +15,14 @@ const PORT = process.env.PORT || 3000;
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/zeroscope';
 
 mongoose.connect(MONGODB_URI)
-  .then(() => console.log('✅ MongoDB connected to ZEROSCOPE database'))
+  .then(() => console.log('MongoDB connected to ZEROSCOPE database'))
   .catch(err => {
-    console.error('❌ MongoDB connection error:', err.message);
+    console.error('MongoDB connection error:', err.message);
     process.exit(1);
   });
 
-mongoose.connection.on('disconnected', () => console.warn('⚠️  MongoDB disconnected'));
-mongoose.connection.on('reconnected', () => console.log('✅ MongoDB reconnected'));
+mongoose.connection.on('disconnected', () => console.warn('MongoDB disconnected'));
+mongoose.connection.on('reconnected', () => console.log('MongoDB reconnected'));
 
 // ─── View Engine ──────────────────────────────────────────────────────────────
 app.set('view engine', 'ejs');
@@ -92,7 +92,7 @@ app.use((req, res) => {
 
 // ─── Global Error Handler ─────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
-  console.error('❌ Error:', err.stack);
+  console.error('Error:', err.stack);
   res.status(err.status || 500).render('error', {
     title: 'Server Error — ZEROSCOPE',
     code: err.status || 500,
@@ -104,7 +104,7 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`
   ╔══════════════════════════════════════╗
-  ║   🔭 ZEROSCOPE is live               ║
+  ║   ZEROSCOPE is live               ║
   ║   http://localhost:${PORT}              ║
   ╚══════════════════════════════════════╝
   `);

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -385,7 +385,7 @@
 
         <!-- Theme Toggle -->
         <button onclick="toggleTheme()" class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--accent-glow)]" style="border:1px solid var(--border);color:var(--text-muted);" title="Toggle theme" aria-label="Toggle theme">
-          <span id="themeIcon">🌙</span>
+          <span id="themeIcon">◐</span>
         </button>
 
         <!-- Notifications -->
@@ -412,7 +412,7 @@
                 <% notifications.slice(0,10).forEach(function(n) { %>
                 <div class="flex gap-3 px-4 py-3 cursor-pointer transition-colors hover:bg-[var(--bg-card2)] <%= !n.read ? 'border-l-2' : '' %>" style="<%= !n.read ? 'border-left-color:var(--accent)' : '' %>;border-bottom:1px solid var(--border);" onclick="readNotif('<%= n._id %>')">
                   <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-base" style="background:var(--bg-card2);">
-                    <%= n.type === 'deadline_critical' ? '🚨' : n.type === 'deadline_warning' ? '⏰' : n.type === 'won' ? '🏆' : n.type === 'new_grant' ? '💰' : n.type === 'new_job' ? '💼' : '🆕' %>
+                    <%= n.type === 'deadline_critical' ? '!' : n.type === 'deadline_warning' ? '◆' : n.type === 'won' ? '+' : n.type === 'new_grant' ? '$' : n.type === 'new_job' ? '◎' : '★' %>
                   </div>
                   <div class="flex-1 min-w-0">
                     <p style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.8rem;color:var(--text);" class="truncate"><%= n.title %></p>
@@ -474,7 +474,7 @@
     <div id="mobileMenu" class="md:hidden hidden pb-3 pt-1" style="border-top:1px solid var(--border);">
       <div class="flex flex-col gap-1 mt-2">
         <a href="/" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Syne',sans-serif;color:var(--text-muted);">🏠 Opportunities</a>
-        <a href="/bookmarks" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Syne',sans-serif;color:var(--text-muted);">🔖 Bookmarks</a>
+        <a href="/bookmarks" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Syne',sans-serif;color:var(--text-muted);">Bookmarks</a>
         <a href="/profile" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Syne',sans-serif;color:var(--text-muted);">👤 Profile</a>
 
         <a href="https://x.com/ZeroScopeHQ" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Syne',sans-serif;color:var(--text-muted);">🐦 Follow @ZeroScopeHQ</a>

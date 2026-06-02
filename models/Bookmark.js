@@ -5,9 +5,9 @@ const bookmarkSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  walletAddress: {
+  userId: {
     type: String,
-    default: 'anonymous',
+    required: true,
     index: true,
   },
   title: { type: String, required: true },
@@ -40,8 +40,8 @@ const bookmarkSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-// Prevent duplicate bookmarks per wallet
-bookmarkSchema.index({ opportunityId: 1, walletAddress: 1 }, { unique: true });
+// Prevent duplicate bookmarks per user
+bookmarkSchema.index({ opportunityId: 1, userId: 1 }, { unique: true });
 
 bookmarkSchema.virtual('isExpired').get(function () {
   if (!this.deadline) return false;

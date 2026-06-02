@@ -29,7 +29,7 @@ async function checkDeadlines() {
         await Notification.create({
           walletAddress: bookmark.walletAddress,
           type: isVeryCritical ? 'deadline_critical' : 'deadline_warning',
-          title: isVeryCritical ? '🚨 Deadline in < 24 hours!' : '⏰ Deadline approaching',
+          title: isVeryCritical ? 'Deadline in < 24 hours!' : 'Deadline approaching',
           message: `"${bookmark.title}" ${isVeryCritical ? 'ends in less than 24 hours' : `ends in ~${hoursLeft} hours`}. Don't miss out!`,
           opportunityId: bookmark.opportunityId,
           opportunityTitle: bookmark.title,
@@ -38,9 +38,9 @@ async function checkDeadlines() {
       }
     }
 
-    console.log(`✅ Deadline check complete. Processed ${urgentBookmarks.length} items.`);
+    console.log(`Deadline check complete. Processed ${urgentBookmarks.length} items.`);
   } catch (err) {
-    console.error('❌ Notification service error:', err.message);
+    console.error('Notification service error:', err.message);
   }
 }
 
@@ -49,14 +49,14 @@ async function createNewBountyNotification(opportunity) {
     await Notification.create({
       walletAddress: 'global',
       type: opportunity.category === 'grant' ? 'new_grant' : opportunity.category === 'job' ? 'new_job' : 'new_bounty',
-      title: `🆕 New ${opportunity.category}: ${opportunity.title.slice(0, 50)}`,
+      title: `New ${opportunity.category}: ${opportunity.title.slice(0, 50)}`,
       message: `A new ${opportunity.category} just dropped from ${opportunity.source}. Reward: ${opportunity.reward} ${opportunity.rewardToken}.`,
       opportunityId: opportunity.id,
       opportunityTitle: opportunity.title,
       link: `/`,
     });
   } catch (err) {
-    console.error('❌ Could not create bounty notification:', err.message);
+    console.error('Could not create bounty notification:', err.message);
   }
 }
 

@@ -6,7 +6,7 @@
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
     <div>
       <h1 style="font-family:'Syne',sans-serif;font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;color:var(--text);">
-        🔖 My Bookmarks
+        My Bookmarks
       </h1>
       <p style="font-size:1rem;color:var(--text-muted);margin-top:4px;">Track your saved opportunities and update their status.</p>
     </div>
@@ -32,7 +32,7 @@
     </div>
     <div class="stat-card">
       <div class="stat-value" style="color:#FFD700;"><%= analytics.won %></div>
-      <div class="stat-label">Won 🏆</div>
+      <div class="stat-label">Won</div>
     </div>
   </div>
 
@@ -72,18 +72,18 @@
         <div class="flex-1 min-w-0">
           <div class="flex flex-wrap items-center gap-2 mb-2">
             <span class="badge badge-<%= bm.category %>">
-              <%= bm.category === 'bounty' ? '🎯' : bm.category === 'grant' ? '💰' : bm.category === 'job' ? '💼' : '🎪' %>
+              <%= bm.category === 'bounty' ? 'Bounty' : bm.category === 'grant' ? 'Grant' : bm.category === 'job' ? 'Job' : 'Event' %>
               <%= bm.category %>
             </span>
             <span class="badge" style="background:var(--bg-card2);color:var(--text-dim);border:1px solid var(--border);">
               <%= bm.source %>
             </span>
             <% if (bm.status === 'won') { %>
-            <span class="badge" style="background:rgba(255,215,0,0.12);color:#FFD700;border:1px solid rgba(255,215,0,0.3);">🏆 Won</span>
+            <span class="badge" style="background:rgba(255,215,0,0.12);color:#FFD700;border:1px solid rgba(255,215,0,0.3);">Won</span>
             <% } else if (bm.status === 'applied') { %>
             <span class="badge" style="background:rgba(139,92,246,0.12);color:#8b5cf6;border:1px solid rgba(139,92,246,0.3);">📤 Applied</span>
             <% } else if (isExp) { %>
-            <span class="badge" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.3);">⚠️ Expired</span>
+            <span class="badge" style="background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.3);">Expired</span>
             <% } else { %>
             <span class="badge" style="background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.3);">● Active</span>
             <% } %>
@@ -115,7 +115,7 @@
             <% if (dl && !isExp) { %>
             <span data-deadline="<%= bm.deadline %>" class="countdown"></span>
             <% } else if (isExp) { %>
-            <span style="font-size:0.8rem;color:var(--danger);font-weight:600;">⚠️ Deadline passed</span>
+            <span style="font-size:0.8rem;color:var(--danger);font-weight:600;">Deadline passed</span>
             <% } else { %>
             <span style="font-size:0.8rem;color:var(--success);font-weight:600;">No deadline</span>
             <% } %>
@@ -132,7 +132,7 @@
             onchange="updateStatus('<%= bm._id %>', this.value)">
             <option value="active"  <%= bm.status === 'active'  ? 'selected' : '' %>>Active</option>
             <option value="applied" <%= bm.status === 'applied' ? 'selected' : '' %>>Applied</option>
-            <option value="won"     <%= bm.status === 'won'     ? 'selected' : '' %>>Won 🏆</option>
+            <option value="won"     <%= bm.status === 'won'     ? 'selected' : '' %>>Won</option>
             <option value="expired" <%= bm.status === 'expired' ? 'selected' : '' %>>Expired</option>
           </select>
 
@@ -156,7 +156,7 @@
 
   <% } else { %>
   <div class="text-center py-20">
-    <div style="font-size:4rem;margin-bottom:16px;">🔖</div>
+    <div style="font-size:4rem;margin-bottom:16px;">★</div>
     <h3 style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;color:var(--text);margin-bottom:8px;">No bookmarks yet</h3>
     <p style="color:var(--text-muted);margin-bottom:20px;">Save bounties, grants, and jobs to track them here.</p>
     <a href="/" class="btn-accent inline-block">Browse Opportunities</a>
@@ -175,7 +175,7 @@ async function updateStatus(bookmarkId, status) {
     });
     const data = await res.json();
     if (data.success) {
-      if (status === 'won') showToast('🏆 Marked as Won! +100 XP', 'success');
+      if (status === 'won') showToast('Marked as Won! +100 XP', 'success');
       else showToast('Status updated!', 'success');
       setTimeout(() => location.reload(), 1000);
     }

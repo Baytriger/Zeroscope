@@ -4,16 +4,16 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
-const savedTheme = localStorage.getItem('zs-theme') || 'dark';
+const savedTheme = localStorage.getItem('zs-theme') || 'light';
 document.documentElement.setAttribute('data-theme', savedTheme);
-document.getElementById('themeIcon').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+document.getElementById('themeIcon').textContent = savedTheme === 'dark' ? 'Dark' : 'Light';
 
 function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme');
   const next = current === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
   localStorage.setItem('zs-theme', next);
-  document.getElementById('themeIcon').textContent = next === 'dark' ? '🌙' : '☀️';
+  document.getElementById('themeIcon').textContent = next === 'dark' ? 'Dark' : 'Light';
 }
 
 // ── Mobile Menu ───────────────────────────────────────────────────────────────
@@ -41,62 +41,9 @@ function readNotif(id) {
   fetch(`/notifications/${id}/read`, { method: 'POST' }).then(() => {});
 }
 
-// ── Wallet Modal ──────────────────────────────────────────────────────────────
-function openWalletModal() { document.getElementById('walletModal').classList.remove('hidden'); }
-function closeWalletModal() { document.getElementById('walletModal').classList.add('hidden'); }
-document.getElementById('walletModal')?.addEventListener('click', function(e) {
-  if (e.target === this) closeWalletModal();
-});
+// ── Notifications end ─────────────────────────────────────────────────────────
 
-async function saveWalletSession(address, walletType) {
-  const res = await fetch('/wallet/connect', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ address, walletType }),
-  });
-  const data = await res.json();
-  if (data.success) {
-    closeWalletModal();
-    showToast(`✅ Wallet connected: ${address.slice(0,6)}...${address.slice(-4)}`, 'success');
-    setTimeout(() => location.reload(), 1200);
-  }
-}
 
-// ── MetaMask ──────────────────────────────────────────────────────────────────
-async function connectMetaMask() {
-  if (typeof window.ethereum === 'undefined') {
-    document.getElementById('walletError').textContent = 'MetaMask not detected. Please install the MetaMask extension.';
-    document.getElementById('walletError').classList.remove('hidden');
-    return;
-  }
-  try {
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    if (accounts[0]) await saveWalletSession(accounts[0], 'metamask');
-  } catch (err) {
-    document.getElementById('walletError').textContent = err.message;
-    document.getElementById('walletError').classList.remove('hidden');
-  }
-}
-
-// ── Phantom ───────────────────────────────────────────────────────────────────
-async function connectPhantom() {
-  const phantom = window.phantom?.solana || window.solana;
-  if (!phantom) {
-    document.getElementById('walletError').textContent = 'Phantom wallet not detected. Please install Phantom.';
-    document.getElementById('walletError').classList.remove('hidden');
-    return;
-  }
-  try {
-    const resp = await phantom.connect();
-    const address = resp.publicKey.toString();
-    await saveWalletSession(address, 'phantom');
-  } catch (err) {
-    document.getElementById('walletError').textContent = err.message;
-    document.getElementById('walletError').classList.remove('hidden');
-  }
-}
-
-// WalletConnect removed — use MetaMask or Phantom
 
 function showWalletMenu() {
   if (confirm('Disconnect your wallet?')) {
@@ -107,7 +54,7 @@ function showWalletMenu() {
 // ── Toast ─────────────────────────────────────────────────────────────────────
 function showToast(message, type = 'info') {
   const colors = { success: '#10b981', error: '#ef4444', info: '#22d3ee', warning: '#f59e0b' };
-  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  const icons = { success: '✓', error: '✗', info: 'i', warning: '!' };
   const toast = document.createElement('div');
   toast.innerHTML = `<span>${icons[type]}</span><span style="font-size:0.875rem;">${message}</span>`;
   toast.style.cssText = `display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;background:var(--bg-card);border:1px solid ${colors[type]}40;color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,0.4);animation:fadeIn 0.3s ease;font-family:'DM Sans',sans-serif;`;
@@ -128,11 +75,11 @@ async function saveBookmark(btn, data) {
     });
     const json = await res.json();
     if (json.success) {
-      btn.innerHTML = '🔖';
+      btn.innerHTML = '★';
       btn.style.color = 'var(--accent)';
       showToast('Saved to bookmarks!', 'success');
     } else if (json.alreadySaved) {
-      btn.innerHTML = '🔖';
+      btn.innerHTML = '★';
       btn.style.color = 'var(--accent)';
       showToast('Already bookmarked!', 'info');
     } else {
@@ -153,7 +100,7 @@ function updateCountdowns() {
     if (isNaN(deadline.getTime())) { el.textContent = ''; return; } // invalid date — hide
     const now = new Date();
     const diff = deadline - now;
-    if (diff <= 0) { el.textContent = '⚠️ Expired'; el.className = 'countdown urgent'; return; }
+    if (diff <= 0) { el.textContent = 'Expired'; el.className = 'countdown urgent'; return; }
     const days = Math.floor(diff / 86400000);
     const hrs  = Math.floor((diff % 86400000) / 3600000);
     const mins = Math.floor((diff % 3600000) / 60000);
@@ -181,7 +128,7 @@ function toggleChat() {
     panel.classList.add('hidden');
   }
   if (chatOpen && chatHistory.length === 0) {
-    appendChatMessage('ai', '👋 Hey! I\'m ZERO, your Web3 opportunity advisor. Tell me your skills or what you\'re looking for, and I\'ll find the best opportunities for you!');
+    appendChatMessage('ai', 'Hi, I\'m ZERO. How can I help you find an opportunity today?');
   }
 }
 
@@ -222,7 +169,7 @@ async function sendChat() {
     chatHistory.push({ role: 'assistant', content: reply });
   } catch {
     document.getElementById('typing')?.remove();
-    appendChatMessage('ai', '⚠️ Connection error. Please try again.');
+    appendChatMessage('ai', 'Connection error. Please try again.');
   }
 }
 
@@ -239,7 +186,7 @@ document.addEventListener('keydown', function(e) {
   <div id="chatPanel" class="card hidden fade-in" style="width:min(340px,calc(100vw - 2rem));max-height:min(420px,60vh);box-shadow:0 20px 60px rgba(0,0,0,0.5);">
     <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--border);flex-shrink:0;">
       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-full flex items-center justify-center text-base" style="background:linear-gradient(135deg,var(--accent),var(--accent2));">🔭</div>
+        <div class="w-8 h-8 rounded-full flex items-center justify-center text-base" style="background:linear-gradient(135deg,var(--accent),var(--accent2));font-family:'Syne',sans-serif;font-weight:700;">Z</div>
         <div>
           <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;color:var(--text);">ZERO AI</div>
           <div style="font-size:0.7rem;color:var(--success);">● Online</div>
@@ -259,8 +206,8 @@ document.addEventListener('keydown', function(e) {
   </div>
 
   <!-- FAB Button -->
-  <button onclick="toggleChat()" class="btn-accent w-14 h-14 rounded-full flex items-center justify-center text-xl shadow-lg" style="box-shadow:0 0 20px var(--accent-glow);">
-    🔭
+  <button onclick="toggleChat()" class="btn-accent w-14 h-14 rounded-full flex items-center justify-center text-xl shadow-lg" style="box-shadow:0 0 20px var(--accent-glow);font-family:'Syne',sans-serif;font-weight:800;">
+    Z
   </button>
 </div>
 

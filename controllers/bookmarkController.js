@@ -5,22 +5,25 @@ const Notification = require('../models/Notification');
 // ─── GET /bookmarks ───────────────────────────────────────────────────────────
 exports.getBookmarks = async (req, res) => {
   try {
-    const walletAddress = req.session.walletAddress || 'anonymous';
+    const userId = req.session.userId;
+    
+    // Require login for bookmarks
+    if (!userId) {
+      req.flash('error', 'Please sign in to view your bookmarks.');
+      return res.redirect('/auth/login');
+    }
+    
     const { status = 'all', category = 'all' } = req.query;
 
-    let query = { walletAddress };
+    let query = { userId };
     if (status !== 'all') query.status = status;
     if (category !== 'all') query.category = category;
 
     const bookmarks = await Bookmark.find(query).sort({ savedAt: -1 });
     const notifications = await Notification.find({
-      $or: [{ walletAddress }, { walletAddress: 'global' }]
+      userId: userId
     }).sort({ createdAt: -1 }).limit(20);
     const unreadCount = notifications.filter(n => !n.read).length;
-
-    const userProfile = walletAddress !== 'anonymous'
-      ? await UserProfile.findOne({ walletAddress })
-      : null;
 
     const analytics = {
       total: bookmarks.length,
@@ -42,7 +45,6 @@ exports.getBookmarks = async (req, res) => {
       analytics,
       notifications,
       unreadCount,
-      userProfile,
       currentStatus: status,
       currentCategory: category,
     });
@@ -55,20 +57,26 @@ exports.getBookmarks = async (req, res) => {
 // ─── POST /bookmarks ──────────────────────────────────────────────────────────
 exports.saveBookmark = async (req, res) => {
   try {
-    const walletAddress = req.session.walletAddress || 'anonymous';
+    const userId = req.session.userId;
+    
+    // Require login
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Please sign in first', requiresLogin: true });
+    }
+    
     const {
       opportunityId, title, description, category,
       source, sourceUrl, reward, rewardToken, deadline, tags, difficulty,
     } = req.body;
 
-    const existing = await Bookmark.findOne({ opportunityId, walletAddress });
+    const existing = await Bookmark.findOne({ opportunityId, userId });
     if (existing) {
       return res.status(200).json({ success: false, message: 'Already bookmarked', alreadySaved: true });
     }
 
     const bookmark = await Bookmark.create({
       opportunityId,
-      walletAddress,
+      userId,
       title,
       description: description || '',
       category: category || 'bounty',
@@ -80,15 +88,6 @@ exports.saveBookmark = async (req, res) => {
       tags: tags ? tags.split(',').map(t => t.trim()) : [],
       difficulty: difficulty || 'intermediate',
     });
-
-    // Update user stats
-    if (walletAddress !== 'anonymous') {
-      await UserProfile.findOneAndUpdate(
-        { walletAddress },
-        { $inc: { bookmarkCount: 1, reputationScore: 5 } },
-        { new: true, upsert: true }
-      );
-    }
 
     res.status(201).json({ success: true, message: 'Saved!', bookmarkId: bookmark._id });
   } catch (err) {
@@ -103,8 +102,14 @@ exports.saveBookmark = async (req, res) => {
 // ─── DELETE /bookmarks/:id ────────────────────────────────────────────────────
 exports.deleteBookmark = async (req, res) => {
   try {
-    const walletAddress = req.session.walletAddress || 'anonymous';
-    await Bookmark.findOneAndDelete({ _id: req.params.id, walletAddress });
+    const userId = req.session.userId;
+    
+    if (!userId) {
+      req.flash('error', 'Please sign in first.');
+      return res.redirect('/auth/login');
+    }
+    
+    await Bookmark.findOneAndDelete({ _id: req.params.id, userId });
     req.flash('success', 'Bookmark removed.');
     res.redirect('/bookmarks');
   } catch (err) {
@@ -117,24 +122,24 @@ exports.deleteBookmark = async (req, res) => {
 // ─── PATCH /bookmarks/:id/status ─────────────────────────────────────────────
 exports.updateStatus = async (req, res) => {
   try {
-    const walletAddress = req.session.walletAddress || 'anonymous';
+    const userId = req.session.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Please sign in first' });
+    }
+    
     const { status } = req.body;
     const bookmark = await Bookmark.findOneAndUpdate(
-      { _id: req.params.id, walletAddress },
+      { _id: req.params.id, userId },
       { status },
       { new: true }
     );
 
     if (status === 'won' && bookmark) {
-      await UserProfile.findOneAndUpdate(
-        { walletAddress },
-        { $inc: { wonBounties: 1, reputationScore: 100 } },
-        { upsert: true }
-      );
       await Notification.create({
-        walletAddress,
+        userId,
         type: 'won',
-        title: '🏆 Congratulations!',
+        title: 'Congratulations',
         message: `You marked "${bookmark.title}" as Won! Your reputation has increased.`,
         opportunityId: bookmark.opportunityId,
         opportunityTitle: bookmark.title,

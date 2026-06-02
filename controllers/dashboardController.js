@@ -8,7 +8,6 @@ const User          = require('../models/User');
 // ─── GET / — Main Dashboard ───────────────────────────────────────────────────
 exports.getDashboard = async (req, res, next) => {
   try {
-    const walletAddress = req.session.walletAddress || null;
     const userId        = req.session.userId || null;
     const { category = 'all', search = '', sort = 'score' } = req.query;
 
@@ -69,26 +68,24 @@ exports.getDashboard = async (req, res, next) => {
       : [];
 
     // ── Bookmarks ────────────────────────────────────────────────────────────
-    const bookmarkQuery = walletAddress
-      ? { walletAddress }
-      : userId
-        ? { userId }
-        : { walletAddress: 'anonymous' };
-    const savedBookmarks = await Bookmark.find(bookmarkQuery).sort({ savedAt: -1 });
+    const bookmarkQuery = userId
+      ? { userId }
+      : { userId: null };
+    const savedBookmarks = userId 
+      ? await Bookmark.find(bookmarkQuery).sort({ savedAt: -1 })
+      : [];
     const bookmarkIds = new Set(savedBookmarks.map(b => b.opportunityId));
 
     // ── Notifications ────────────────────────────────────────────────────────
-    const notifQuery = walletAddress
-      ? { $or: [{ walletAddress }, { walletAddress: 'global' }] }
-      : { walletAddress: 'global' };
-    const notifications = await Notification.find(notifQuery).sort({ createdAt: -1 }).limit(20);
+    const notifQuery = userId
+      ? { userId }
+      : { userId: null };
+    const notifications = userId
+      ? await Notification.find(notifQuery).sort({ createdAt: -1 }).limit(20)
+      : [];
     const unreadCount   = notifications.filter(n => !n.read).length;
 
-    // ── User profile (wallet-based) ───────────────────────────────────────────
-    let userProfile = null;
-    if (walletAddress) {
-      userProfile = await UserProfile.findOne({ walletAddress });
-    }
+    // ── User profile removed (wallet-based deprecated) ───────────────────────
 
     // ── Analytics ────────────────────────────────────────────────────────────
     const bounties = allOpportunities.filter(o => o.category === 'bounty');
@@ -121,7 +118,6 @@ exports.getDashboard = async (req, res, next) => {
       unreadCount,
       userProfile,
       loggedInUser,
-      isPersonalized,
       currentCategory: category,
       currentSearch: search,
       currentSort: sort,

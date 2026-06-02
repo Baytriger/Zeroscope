@@ -28,7 +28,7 @@ exports.connectWallet = async (req, res) => {
         id: 'newcomer',
         name: 'Newcomer',
         description: 'Just joined ZEROSCOPE',
-        icon: '🌱',
+        icon: '◦',
       });
       await profile.save();
     }

@@ -40,7 +40,7 @@
           <% if (loggedInUser.skills && loggedInUser.skills.length > 0) { %>
           <span style="font-size:0.75rem;color:var(--text-dim);"><%= loggedInUser.skills.length %> skill<%= loggedInUser.skills.length !== 1 ? 's' : '' %> saved</span>
           <% } else { %>
-          <span style="font-size:0.75rem;color:#f59e0b;">⚠️ Add skills to get personalized rankings</span>
+          <span style="font-size:0.75rem;color:#f59e0b;">Add skills to get personalized rankings</span>
           <% } %>
         </div>
       </div>
@@ -49,7 +49,7 @@
 
   <!-- ── Skills & Personalization ── -->
   <div class="card p-6 sm:p-8 mb-6 fade-in">
-    <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--text);margin-bottom:4px;">🎯 Skills & Personalization</h2>
+    <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--text);margin-bottom:4px;">Skills & Personalization</h2>
     <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">These are used to score and rank opportunities for you. The more accurate, the better your matches.</p>
 
     <!-- Experience Level -->
@@ -65,7 +65,7 @@
                  background:<%= (loggedInUser.experienceLevel || 'intermediate') === lvl ? 'rgba(var(--accent-rgb),0.12)' : 'var(--bg-card2)' %>;
                  color:<%= (loggedInUser.experienceLevel || 'intermediate') === lvl ? 'var(--accent)' : 'var(--text-muted)' %>;
                  font-family:'Syne',sans-serif;">
-          <%= lvl === 'beginner' ? '🌱' : lvl === 'intermediate' ? '⚡' : lvl === 'advanced' ? '🔥' : '🏆' %>
+          <%= lvl === 'beginner' ? 'Beginner' : lvl === 'intermediate' ? 'Intermediate' : lvl === 'advanced' ? 'Advanced' : 'Expert' %>
           <%= lvl.charAt(0).toUpperCase() + lvl.slice(1) %>
         </button>
         <% }) %>
@@ -109,7 +109,7 @@
     </div>
 
     <button onclick="saveSkills()" class="btn-accent w-full" style="padding:14px;" id="skillsBtn">
-      💾 Save Skills & Personalize Dashboard
+      Save Skills & Personalize Dashboard
     </button>
     <p id="skillsMsg" class="text-center hidden mt-3" style="font-size:0.85rem;font-family:'Syne',sans-serif;"></p>
   </div>
@@ -164,7 +164,7 @@
       <div class="stat-label">Experience</div>
     </div>
     <div class="stat-card text-center col-span-2 sm:col-span-1">
-      <div class="stat-value" style="font-size:1rem;color:#22d3ee;"><%= loggedInUser.skills && loggedInUser.skills.length > 0 ? '✅ Active' : '⚠️ Setup needed' %></div>
+      <div class="stat-value" style="font-size:1rem;color:#22d3ee;"><%= loggedInUser.skills && loggedInUser.skills.length > 0 ? 'Active' : 'Setup needed' %></div>
       <div class="stat-label">Personalization</div>
     </div>
   </div>
@@ -274,8 +274,8 @@ async function saveSkills() {
     });
     const data = await res.json();
     if (data.success) {
-      showToast('✅ Skills saved! Dashboard personalized.', 'success');
-      msg.textContent = '✅ Skills saved! Your dashboard is now personalized.';
+      showToast('Skills saved! Dashboard personalized.', 'success');
+      msg.textContent = 'Skills saved! Your dashboard is now personalized.';
       msg.style.color = 'var(--success)';
       msg.classList.remove('hidden');
       setTimeout(() => { window.location.href = '/'; }, 1500);
@@ -290,7 +290,7 @@ async function saveSkills() {
     msg.classList.remove('hidden');
   }
   btn.disabled = false;
-  btn.textContent = '💾 Save Skills & Personalize Dashboard';
+  btn.textContent = 'Save Skills & Personalize Dashboard';
 }
 
 // ── Avatar upload ────────────────────────────────────────────────────────────
@@ -319,8 +319,8 @@ async function saveProfile() {
     const res  = await fetch('/profile/update', { method: 'POST', body: formData });
     const data = await res.json();
     if (data.success) {
-      showToast('✅ Profile saved!', 'success');
-      msg.textContent = '✅ Updated!'; msg.style.color = 'var(--success)'; msg.classList.remove('hidden');
+      showToast('Profile saved!', 'success');
+      msg.textContent = 'Updated!'; msg.style.color = 'var(--success)'; msg.classList.remove('hidden');
       setTimeout(() => location.reload(), 1200);
     } else {
       msg.textContent = data.message || 'Error.'; msg.style.color = 'var(--danger)'; msg.classList.remove('hidden');

@@ -8,15 +8,15 @@ function smartReply(message, opportunities) {
   const msg = message.toLowerCase().trim();
   const all = opportunities;
 
-  // Format one opportunity nicely
+  // Format one opportunity nicely (no emojis)
   const fmt = (op) => {
     const days = op.deadline ? Math.max(0, Math.ceil((new Date(op.deadline) - Date.now()) / 86400000)) : null;
-    const deadline = days !== null ? `⏱ ${days}d left` : '🟢 Open';
-    const reward = isNaN(parseFloat(op.reward)) ? op.reward : `$${parseFloat(op.reward).toLocaleString()}`;
+    const deadline = days !== null ? `${days}d left` : 'Open';
+    const reward = isNaN(parseFloat(op.reward)) ? op.reward : `${op.rewardToken} ${parseFloat(op.reward).toLocaleString()}`;
     return `**${op.title}**\n` +
-      `   💰 ${reward} ${op.rewardToken} · ${op.difficulty} · ${deadline}\n` +
-      `   🏷 ${(op.tags || []).slice(0,4).join(', ') || 'General'} · ${op.source}\n` +
-      (op.sourceUrl ? `   🔗 ${op.sourceUrl}` : '');
+      `   ${reward} | ${op.difficulty} | ${deadline}\n` +
+      `   Tags: ${(op.tags || []).slice(0,4).join(', ') || 'General'} | ${op.source}\n` +
+      (op.sourceUrl ? `   Link: ${op.sourceUrl}` : '');
   };
 
   // Match opportunity text
@@ -25,26 +25,24 @@ function smartReply(message, opportunities) {
       (op.title + ' ' + (op.tags || []).join(' ') + ' ' + (op.description || '')).toLowerCase().includes(k)
     );
 
-  // Greetings
+  // Greetings - simple first message
   if (/^(hi|hello|hey|sup|yo|what.s up|howdy)/.test(msg)) {
     const total = all.length;
-    const hot = all.filter(o => o.isHot).length;
-    return `👋 Hey! I'm **ZERO**, your Web3 opportunity advisor on ZEROSCOPE.\n\nRight now we have **${total} live opportunities** — ${hot} are trending 🔥\n\nTell me your skills or ask me anything! Try:\n• *"I'm a content writer"*\n• *"Show me hot bounties"*\n• *"Best for beginners"*\n• *"What grants are open?"*`;
+    return `Hi, I'm ZERO. How can I help you find an opportunity today? You can tell me your skills, ask about a specific category, or I can show you what's trending.`;
   }
 
   // Help
   if (/^help|what can you|what do you know|commands/.test(msg)) {
-    return `🔭 Here's what I can help with:\n\n**By skill:** "I'm a [designer/developer/writer/marketer]"\n**By category:** "Show me [bounties/grants/jobs/events]"\n**By level:** "Best for beginners" / "Advanced opportunities"\n**By platform:** "Show Zero Authority opportunities" / "Superteam listings"\n**Hot picks:** "What's trending?" / "Hot opportunities"\n**Deadline:** "Ending soon" / "Urgent bounties"\n**Stats:** "How many opportunities?" / "Total rewards"\n\nI know all ${all.length} live listings — just ask!`;
+    return `I can help you find opportunities in several ways:\n\nBy skill: "I'm a [designer/developer/writer/marketer]"\nBy category: "Show me [bounties/grants/jobs/events]"\nBy level: "Best for beginners" or "Advanced opportunities"\nBy platform: "Zero Authority DAO" or "Superteam"\nTop picks: "What's trending?"\nDeadlines: "Ending soon"\nStats: "How many opportunities?"\n\nWe have ${all.length} live listings. What are you looking for?`;
   }
 
   // Stats
   if (/how many|total|count|stats|overview/.test(msg)) {
     const cats = ['bounty','grant','job','event'];
     const counts = cats.map(c => `${all.filter(o=>o.category===c).length} ${c}s`).join(', ');
-    const hotCount = all.filter(o=>o.isHot).length;
     const zaCount = all.filter(o=>o.source.includes('Zero Authority')).length;
     const stCount = all.filter(o=>o.source.includes('Superteam')).length;
-    return `📊 **ZEROSCOPE Live Stats:**\n\n**${all.length} total opportunities**\n• ${counts}\n• ${hotCount} trending 🔥\n\n**By platform:**\n• Zero Authority DAO: ${zaCount}\n• Superteam Earn: ${stCount}\n• Others: ${all.length - zaCount - stCount}`;
+    return `ZEROSCOPE has ${all.length} total opportunities: ${counts}\n\nBy platform:\n- Zero Authority DAO: ${zaCount}\n- Superteam Earn: ${stCount}\n- Others: ${all.length - zaCount - stCount}`;
   }
 
   // Skill-based matching
@@ -82,7 +80,7 @@ function smartReply(message, opportunities) {
       const skill = pattern.split('|')[0];
       if (matches.length > 0) {
         const total = all.filter(op => match(op, keywords)).length;
-        return `🎯 Top picks for **${skill}** skills (${total} total matches):\n\n${matches.map(fmt).join('\n\n')}\n\n💡 Click the 🔗 links above to apply directly!`;
+        return `Top matches for ${skill} (${total} total):\n\n${matches.map(fmt).join('\n\n')}\n\nClick the links to apply!`;
       }
     }
   }
@@ -91,40 +89,40 @@ function smartReply(message, opportunities) {
   if (/bounty|bounties/.test(msg)) {
     const items = all.filter(o => o.category === 'bounty')
       .sort((a,b) => (b.isHot?1:0)-(a.isHot?1:0)).slice(0, 3);
-    return `🎯 **Top Bounties right now (${all.filter(o=>o.category==='bounty').length} total):**\n\n${items.map(fmt).join('\n\n')}\n\nFilter by "Bounties" on the dashboard to see all!`;
+    return `Top Bounties (${all.filter(o=>o.category==='bounty').length} total):\n\n${items.map(fmt).join('\n\n')}\n\nFilter by Bounties on the dashboard to see all.`;
   }
 
   if (/grant|grants|funding|degrant/.test(msg)) {
     const items = all.filter(o => o.category === 'grant').slice(0, 3);
     return items.length > 0
-      ? `💰 **Active Grants (${all.filter(o=>o.category==='grant').length} total):**\n\n${items.map(fmt).join('\n\n')}\n\nGrants typically have larger rewards but require a proposal.`
+      ? `Active Grants (${all.filter(o=>o.category==='grant').length} total):\n\n${items.map(fmt).join('\n\n')}\n\nGrants typically have larger rewards but require a proposal.`
       : `No grants currently listed. Check Zero Authority DeGrants at zeroauthoritydao.com/funding/degrants`;
   }
 
   if (/job|jobs|work|hire|hiring|career|employ/.test(msg)) {
     const items = all.filter(o => o.category === 'job').slice(0, 3);
     return items.length > 0
-      ? `💼 **Open Web3 Jobs (${all.filter(o=>o.category==='job').length} total):**\n\n${items.map(fmt).join('\n\n')}\n\nMost are remote-first. Click the links to apply!`
-      : `No jobs currently listed. Check web3.career directly!`;
+      ? `Open Web3 Jobs (${all.filter(o=>o.category==='job').length} total):\n\n${items.map(fmt).join('\n\n')}\n\nMost are remote-first. Check the links to apply!`
+      : `No jobs currently listed. Check web3.career directly.`;
   }
 
   if (/event|events|hackathon|quest|quests/.test(msg)) {
     const items = all.filter(o => o.category === 'event').slice(0, 3);
     return items.length > 0
-      ? `🎪 **Events & Quests (${all.filter(o=>o.category==='event').length} total):**\n\n${items.map(fmt).join('\n\n')}\n\nEvents are great for building your on-chain reputation!`
-      : `No events currently listed. Watch the Zero Authority DAO community for upcoming events!`;
+      ? `Events & Quests (${all.filter(o=>o.category==='event').length} total):\n\n${items.map(fmt).join('\n\n')}\n\nEvents are great for building your reputation!`
+      : `No events currently listed. Check back soon!`;
   }
 
   // Platform queries
   if (/zero authority|zero dao|za |stacks/.test(msg)) {
     const items = all.filter(o => o.source.includes('Zero Authority')).slice(0, 3);
-    return `🏛️ **Zero Authority DAO Opportunities (${all.filter(o=>o.source.includes('Zero Authority')).length} total):**\n\n${items.map(fmt).join('\n\n')}`;
+    return `Zero Authority DAO Opportunities (${all.filter(o=>o.source.includes('Zero Authority')).length} total):\n\n${items.map(fmt).join('\n\n')}`;
   }
 
   if (/superteam|solana/.test(msg)) {
     const items = all.filter(o => o.source.includes('Superteam')).slice(0, 3);
     return items.length > 0
-      ? `⚡ **Superteam Earn Listings (${items.length} shown):**\n\n${items.map(fmt).join('\n\n')}`
+      ? `Superteam Earn Listings:\n\n${items.map(fmt).join('\n\n')}`
       : `No Superteam listings loaded right now. Visit earn.superteam.fun directly.`;
   }
 
@@ -133,14 +131,14 @@ function smartReply(message, opportunities) {
     const items = all.filter(o => o.difficulty === 'beginner')
       .sort((a,b) => (b.isHot?1:0)-(a.isHot?1:0)).slice(0, 3);
     return items.length > 0
-      ? `🌱 **Best for Beginners (${all.filter(o=>o.difficulty==='beginner').length} total):**\n\n${items.map(fmt).join('\n\n')}\n\nThese are great starting points to build your Web3 reputation!`
+      ? `Best for Beginners (${all.filter(o=>o.difficulty==='beginner').length} total):\n\n${items.map(fmt).join('\n\n')}\n\nThese are great starting points to build your Web3 reputation.`
       : `No beginner opportunities right now. Check back soon!`;
   }
 
   if (/advanced|expert|senior|hard|difficult/.test(msg)) {
     const items = all.filter(o => ['advanced','expert'].includes(o.difficulty)).slice(0, 3);
     return items.length > 0
-      ? `🔥 **Advanced Opportunities:**\n\n${items.map(fmt).join('\n\n')}`
+      ? `Advanced Opportunities:\n\n${items.map(fmt).join('\n\n')}`
       : `No advanced-level opportunities right now.`;
   }
 
@@ -148,8 +146,8 @@ function smartReply(message, opportunities) {
   if (/hot|trend|popular|best|top|recommend/.test(msg)) {
     const items = all.filter(o => o.isHot).slice(0, 3);
     return items.length > 0
-      ? `🔥 **Trending Right Now:**\n\n${items.map(fmt).join('\n\n')}\n\nThese are the most active opportunities on ZEROSCOPE!`
-      : `No trending opportunities tagged right now. Here are the newest:\n\n${all.slice(0,3).map(fmt).join('\n\n')}`;
+      ? `Trending Right Now:\n\n${items.map(fmt).join('\n\n')}\n\nThese are the most active opportunities on ZEROSCOPE.`
+      : `No trending opportunities right now. Here are the newest:\n\n${all.slice(0,3).map(fmt).join('\n\n')}`;
   }
 
   // Deadline urgency
@@ -159,7 +157,7 @@ function smartReply(message, opportunities) {
       .sort((a,b) => new Date(a.deadline) - new Date(b.deadline))
       .slice(0, 3);
     return items.length > 0
-      ? `⏱️ **Ending Soonest — Apply Now:**\n\n${items.map(fmt).join('\n\n')}\n\nDon't miss these deadlines!`
+      ? `Ending Soonest — Apply Now:\n\n${items.map(fmt).join('\n\n')}\n\nDont miss these deadlines!`
       : `No upcoming deadlines tracked right now.`;
   }
 
@@ -170,7 +168,7 @@ function smartReply(message, opportunities) {
       .sort((a,b) => parseFloat(b.reward) - parseFloat(a.reward))
       .slice(0, 3);
     return items.length > 0
-      ? `💰 **Highest Rewards Available:**\n\n${items.map(fmt).join('\n\n')}\n\nHigher rewards usually mean more competition — make sure your submission stands out!`
+      ? `Highest Rewards Available:\n\n${items.map(fmt).join('\n\n')}\n\nHigher rewards usually mean more competition. Make your submission stand out!`
       : `Most rewards are listed as TBD. Check each opportunity's page for details.`;
   }
 
@@ -181,10 +179,10 @@ function smartReply(message, opportunities) {
   ).slice(0, 2);
 
   if (fuzzy.length > 0) {
-    return `Here's what I found related to your query:\n\n${fuzzy.map(fmt).join('\n\n')}\n\n💡 Try: *"I'm a [skill]"*, *"show me bounties"*, or *"help"* for all commands.`;
+    return `Here's what I found related to that:\n\n${fuzzy.map(fmt).join('\n\n')}\n\nTry: "I'm a [skill]", "show me bounties", or "help" for all commands.`;
   }
 
-  return `🔭 I couldn't find a match for that. Here are today's top picks:\n\n${all.filter(o=>o.isHot).slice(0,2).map(fmt).join('\n\n')}\n\nType **"help"** to see everything I can do, or ask *"I'm a [your skill]"* for personalized picks!`;
+  return `I couldn't find a match for that. Here are today's top picks:\n\n${all.filter(o=>o.isHot).slice(0,2).map(fmt).join('\n\n')}\n\nType "help" to see everything I can do!`;
 }
 
 // POST /api/chat
@@ -228,7 +226,7 @@ router.post('/chat', async (req, res) => {
 
   } catch (err) {
     console.error('Chat error:', err.message);
-    res.json({ success: true, reply: '🔭 Something went wrong. Try asking: "Show me hot bounties" or "I\'m a designer, what should I apply for?"' });
+    res.json({ success: true, reply: 'Something went wrong. Try asking: "Show me hot bounties" or "I\'m a designer, what should I apply for?"' });
   }
 });
 

@@ -31,11 +31,11 @@ const userProfileSchema = new mongoose.Schema({
 
 // Compute badge tier based on reputation
 userProfileSchema.virtual('tier').get(function () {
-  if (this.reputationScore >= 1000) return { name: 'Top Contributor', color: '#FFD700', icon: '👑' };
-  if (this.reputationScore >= 500) return { name: 'Active Hunter', color: '#00E5FF', icon: '🎯' };
-  if (this.reputationScore >= 200) return { name: 'Builder', color: '#7C4DFF', icon: '🏗️' };
-  if (this.reputationScore >= 50) return { name: 'Explorer', color: '#00BFA5', icon: '🔭' };
-  return { name: 'Newcomer', color: '#78909C', icon: '🌱' };
+  if (this.reputationScore >= 1000) return { name: 'Top Contributor', color: '#FFD700', icon: '★' };
+  if (this.reputationScore >= 500) return { name: 'Active Hunter', color: '#00E5FF', icon: '◆' };
+  if (this.reputationScore >= 200) return { name: 'Builder', color: '#7C4DFF', icon: '■' };
+  if (this.reputationScore >= 50) return { name: 'Explorer', color: '#00BFA5', icon: 'Z' };
+  return { name: 'Newcomer', color: '#78909C', icon: '◦' };
 });
 
 userProfileSchema.set('toJSON', { virtuals: true });

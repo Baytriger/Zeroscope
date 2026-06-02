@@ -12,7 +12,7 @@ async function fetchSuperteam() {
     });
 
     const items = res.data?.listings || res.data?.data || res.data || [];
-    console.log(`✅ Superteam API: ${items.length} listings fetched`);
+    console.log(`Superteam API: ${items.length} listings fetched`);
 
     return items.map(item => ({
       id: `st-${item.id || item.slug}`,
@@ -32,7 +32,7 @@ async function fetchSuperteam() {
       raw: {},
     }));
   } catch (err) {
-    console.warn('⚠️  Superteam API failed:', err.message);
+    console.warn('Superteam API failed:', err.message);
     return [];
   }
 }
@@ -61,7 +61,7 @@ async function fetchZeroAuthority() {
   try {
     const res = await axios.get(`${BASE}/bounties`, { timeout: 8000, headers: { Accept: 'application/json' } });
     const items = res.data?.data || res.data || [];
-    console.log(`✅ ZA bounties: ${items.length} items`);
+    console.log(`ZA bounties: ${items.length} items`);
     items.forEach(item => {
       if (item.isExpired) return;
       const title = String(item.name || '').trim();
@@ -91,13 +91,13 @@ async function fetchZeroAuthority() {
         raw: {},
       });
     });
-  } catch(e) { console.warn('⚠️  ZA bounties failed:', e.message); }
+  } catch(e) { console.warn('ZA bounties failed:', e.message); }
 
   // ── GRANTS ────────────────────────────────────────────────────────────────
   try {
     const res = await axios.get(`${BASE}/grants`, { timeout: 8000, headers: { Accept: 'application/json' } });
     const items = res.data?.data || res.data || [];
-    console.log(`✅ ZA grants: ${items.length} items`);
+    console.log(`ZA grants: ${items.length} items`);
     items.forEach(item => {
       const title = String(item.projectName || '').trim();
       if (!title || title.length < 3) return;
@@ -126,13 +126,13 @@ async function fetchZeroAuthority() {
         raw: {},
       });
     });
-  } catch(e) { console.warn('⚠️  ZA grants failed:', e.message); }
+  } catch(e) { console.warn('ZA grants failed:', e.message); }
 
   // ── EVENTS ────────────────────────────────────────────────────────────────
   try {
     const res = await axios.get(`${BASE}/events`, { timeout: 8000, headers: { Accept: 'application/json' } });
     const items = res.data?.data || res.data || [];
-    console.log(`✅ ZA events: ${items.length} items`);
+    console.log(`ZA events: ${items.length} items`);
     items.forEach(item => {
       const title = String(item.name || item.title || '').trim();
       if (!title) return;
@@ -154,7 +154,7 @@ async function fetchZeroAuthority() {
         raw: {},
       });
     });
-  } catch(e) { console.warn('⚠️  ZA events failed:', e.message); }
+  } catch(e) { console.warn('ZA events failed:', e.message); }
 
   return results;
 }
@@ -166,18 +166,13 @@ function getMockData() {
     // Zero Authority data — all from live API (bounties, grants, events)
     // Superteam Earn
         // Superteam Earn — verified live listings (May 2026)
-    { id:'st-f1', title:'Create X Content to Introduce Moony',                    description:'Moony Foundation seeking creators to produce X (Twitter) content introducing the Moony project. Design & Content skills. $300 USDC total prizes — multiple winners.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/moony/',                                                                reward:'$300',  rewardToken:'USDC', deadline:d(7),  tags:['Content','Twitter','Design','Solana'],      difficulty:'beginner',     applicants:93, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
-    { id:'st-f2', title:'HelpBnk x Superteam | Business Challenge',               description:'Superteam UK & HelpBnk challenge you to propose Web3 + banking business solutions. $10,000 USDG total across 10 winners. Content, Growth, Dev all welcome.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/helpbnk-superteam-business-challenge-march-2026/',                    reward:'$10,000', rewardToken:'USDG', deadline:d(3),  tags:['Business','Content','Growth','Finance'],    difficulty:'intermediate', applicants:74, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
-    { id:'st-f3', title:'Write About Trepa — $1,500 Documentation Bounty',        description:'Trepa seeking writers to create docs, tutorials or explainers. $1,500 USDC bounty. Strong writing and Web3 knowledge required.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/write-about-trepa-1500-usdc/',                                                                      reward:'$1,500', rewardToken:'USDC', deadline:d(6),  tags:['Writing','Documentation','Content','Web3'], difficulty:'intermediate', applicants:38, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
+    { id:'st-f1', title:'Create X Content to Introduce Moony',                    description:'Moony Foundation seeking creators to produce X (Twitter) content introducing the Moony project. Design & Content skills. 300 USDC total prizes — multiple winners.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/moony/',                                                                reward:'300',  rewardToken:'USDC', deadline:d(7),  tags:['Content','Twitter','Design','Solana'],      difficulty:'beginner',     applicants:93, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
+    { id:'st-f2', title:'HelpBnk x Superteam | Business Challenge',               description:'Superteam UK & HelpBnk challenge you to propose Web3 + banking business solutions. 10,000 USDG total across 10 winners. Content, Growth, Dev all welcome.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/helpbnk-superteam-business-challenge-march-2026/',                    reward:'10000', rewardToken:'USDG', deadline:d(3),  tags:['Business','Content','Growth','Finance'],    difficulty:'intermediate', applicants:74, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
+    { id:'st-f3', title:'Write About Trepa — 1,500 Documentation Bounty',        description:'Trepa seeking writers to create docs, tutorials or explainers. 1,500 USDC bounty. Strong writing and Web3 knowledge required.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/write-about-trepa-1500-usdc/',                                                                      reward:'1500', rewardToken:'USDC', deadline:d(6),  tags:['Writing','Documentation','Content','Web3'], difficulty:'intermediate', applicants:38, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
     { id:'st-f4', title:'Solana Consumer Day — Best Consumer Insights Thread',     description:'Superteam Black asking for the best consumer insights Twitter thread about the Solana ecosystem. Multiple winners. Open globally.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/solana-consumer-day-best-consumer-insights-thread',                                             reward:'TBD',    rewardToken:'USDC', deadline:d(5),  tags:['Content','Twitter','Solana','Research'],    difficulty:'beginner',     applicants:41, isHot:true,  createdAt:new Date().toISOString(), raw:{} },
     { id:'st-f5', title:'Promote Solana Summit Kazakhstan — Content & Community',  description:'Superteam Kazakhstan looking for creators to promote the Solana Summit Kazakhstan event through content and community engagement.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/promote-solana-summit-kazakhstan-content-and-community-bounty/',                              reward:'TBD',    rewardToken:'USDC', deadline:d(2),  tags:['Marketing','Community','Solana','Events'],  difficulty:'beginner',     applicants:29, isHot:false, createdAt:new Date().toISOString(), raw:{} },
     { id:'st-f6', title:'Loofta Pay x MagicBlock — Creator & Content Bounty',     description:'Superteam Ireland bounty for creators to produce content for Loofta Pay and MagicBlock. Multiple formats accepted — threads, videos, articles.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/loofta-pay-x-magicblock-creator-and-content-bounty/',                              reward:'TBD',    rewardToken:'USDC', deadline:d(8),  tags:['Content','Marketing','Solana','Payments'],  difficulty:'beginner',     applicants:22, isHot:false, createdAt:new Date().toISOString(), raw:{} },
     { id:'st-f7', title:'Kazakhstan Solana Projects Spotlight — Content Bounty',   description:'Superteam Kazakhstan wants content spotlighting Solana projects building in Kazakhstan. Writers, designers, and video creators welcome.', category:'bounty', source:'Superteam Earn', sourceUrl:'https://superteam.fun/earn/listing/kazakhstan-solana-projects-spotlight-content-bounty/',                                   reward:'TBD',    rewardToken:'USDC', deadline:d(10), tags:['Content','Spotlight','Solana','Community'],  difficulty:'beginner',     applicants:18, isHot:false, createdAt:new Date().toISOString(), raw:{} },
-
-
-
-    // Web3 Foundation Grants
-    { id:'w3f-g1', title:'Web3 Foundation Open Grants Program', description:'Web3 Foundation funds open-source projects benefiting the Polkadot and Substrate ecosystem. Grants range from $10k to $100k+. Apply via GitHub.', category:'grant', source:'Web3 Foundation', sourceUrl:'https://grants.web3.foundation/applications', reward:'$10k–$100k+', rewardToken:'USD', deadline:null, tags:['Polkadot','Substrate','Open Source','Infrastructure'], difficulty:'advanced', applicants:0, isHot:false, createdAt:new Date().toISOString(), raw:{} },
   ];
 }
 
