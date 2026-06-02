@@ -91,10 +91,10 @@ async function saveBookmark(btn, data) {
 function updateCountdowns() {
   document.querySelectorAll('[data-deadline]').forEach(el => {
     const deadline = new Date(el.dataset.deadline);
-    if (isNaN(deadline.getTime())) { el.textContent = ''; return; } // invalid date — hide
+    if (isNaN(deadline.getTime())) { el.textContent = ''; return; }
     const now = new Date();
     const diff = deadline - now;
-    if (diff <= 0) { el.textContent = 'Expired'; el.className = 'countdown urgent'; return; }
+    if (diff <= 0) { el.textContent = '⚠️ Expired'; el.className = 'countdown urgent'; return; }
     const days = Math.floor(diff / 86400000);
     const hrs  = Math.floor((diff % 86400000) / 3600000);
     const mins = Math.floor((diff % 3600000) / 60000);
@@ -103,107 +103,12 @@ function updateCountdowns() {
     el.className = 'countdown ' + (diff < 86400000 ? 'urgent' : diff < 259200000 ? 'warning' : 'ok');
   });
 }
-updateCountdowns();
-setInterval(updateCountdowns, 60000);
+document.addEventListener('DOMContentLoaded', () => {
+  updateCountdowns();
+  setInterval(updateCountdowns, 60000);
+});
 
 // ── AI Chat ───────────────────────────────────────────────────────────────────
-let chatHistory = [];
-let chatOpen = false;
-
-function toggleChat() {
-  const panel = document.getElementById('chatPanel');
-  chatOpen = !chatOpen;
-  if (chatOpen) {
-    panel.classList.remove('hidden');
-    panel.style.display = 'flex';
-    panel.style.flexDirection = 'column';
-  } else {
-    panel.style.display = '';
-    panel.classList.add('hidden');
-  }
-  if (chatOpen && chatHistory.length === 0) {
-    appendChatMessage('ai', 'Hi, I\'m ZERO. How can I help you find an opportunity today?');
-  }
-}
-
-function appendChatMessage(role, text) {
-  const container = document.getElementById('chatMessages');
-  const div = document.createElement('div');
-  div.className = 'flex ' + (role === 'user' ? 'justify-end' : 'justify-start');
-  div.innerHTML = `<div class="chat-bubble-${role} px-4 py-3 max-w-xs" style="font-size:0.875rem;line-height:1.5;">${text}</div>`;
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
-}
-
-async function sendChat() {
-  const input = document.getElementById('chatInput');
-  const msg = input.value.trim();
-  if (!msg) return;
-  input.value = '';
-  appendChatMessage('user', msg);
-  chatHistory.push({ role: 'user', content: msg });
-
-  const typing = document.createElement('div');
-  typing.id = 'typing';
-  typing.className = 'flex justify-start';
-  typing.innerHTML = `<div class="chat-bubble-ai px-4 py-3" style="font-size:0.875rem;">ZERO is thinking<span class="typing-dots">...</span></div>`;
-  document.getElementById('chatMessages').appendChild(typing);
-  document.getElementById('chatMessages').scrollTop = 99999;
-
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg, history: chatHistory.slice(-6) }),
-    });
-    const data = await res.json();
-    document.getElementById('typing')?.remove();
-    const reply = data.reply || 'Sorry, I could not process that.';
-    appendChatMessage('ai', reply);
-    chatHistory.push({ role: 'assistant', content: reply });
-  } catch {
-    document.getElementById('typing')?.remove();
-    appendChatMessage('ai', 'Connection error. Please try again.');
-  }
-}
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && document.activeElement === document.getElementById('chatInput')) {
-    sendChat();
-  }
-});
-</script>
-
-<!-- AI Chat Floating Button -->
-<div class="fixed z-40 flex flex-col items-start gap-3" style="bottom:1.25rem;left:1rem;">
-  <!-- Chat Panel -->
-  <div id="chatPanel" class="card hidden fade-in" style="width:min(340px,calc(100vw - 2rem));max-height:min(420px,60vh);box-shadow:0 20px 60px rgba(0,0,0,0.5);">
-    <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--border);flex-shrink:0;">
-      <div class="flex items-center gap-2">
-        <div class="w-8 h-8 rounded-full flex items-center justify-center text-base" style="background:linear-gradient(135deg,var(--accent),var(--accent2));font-family:'Syne',sans-serif;font-weight:700;">Z</div>
-        <div>
-          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;color:var(--text);">ZERO AI</div>
-          <div style="font-size:0.7rem;color:var(--success);">● Online</div>
-        </div>
-      </div>
-      <button onclick="toggleChat()" style="color:var(--text-muted);font-size:1.1rem;padding:4px 8px;">✕</button>
-    </div>
-    <div id="chatMessages" class="flex flex-col gap-3 p-4 overflow-y-auto" style="flex:1;min-height:0;"></div>
-    <div class="p-3" style="border-top:1px solid var(--border);flex-shrink:0;">
-      <div class="flex gap-2">
-        <input id="chatInput" type="text" placeholder="Ask ZERO about opportunities..." class="zs-input" style="font-size:0.85rem;padding:8px 12px;" />
-        <button onclick="sendChat()" class="btn-accent px-3 flex-shrink-0" style="padding:8px 14px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- FAB Button -->
-  <button onclick="toggleChat()" class="btn-accent w-14 h-14 rounded-full flex items-center justify-center text-xl shadow-lg" style="box-shadow:0 0 20px var(--accent-glow);font-family:'Syne',sans-serif;font-weight:800;">
-    Z
-  </button>
-</div>
 
 
 <!-- ═══ FOOTER ═══════════════════════════════════════════════════════════════ -->

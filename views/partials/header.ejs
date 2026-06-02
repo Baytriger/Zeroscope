@@ -288,29 +288,10 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
 
-    /* ── Wallet Button ───────────────────────────────────────────────────── */
-    .wallet-btn {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
-      border-radius: 10px;
-      font-family: 'Outfit', sans-serif;
-      font-weight: 600;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .wallet-btn.connected {
-      background: rgba(16,185,129,0.12);
-      border: 1px solid rgba(16,185,129,0.3);
-      color: #10b981;
-    }
-    .wallet-btn.disconnected {
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border: none;
-      color: #fff;
-    }
+
+    
+    
+    
 
     /* ── Mobile responsive helpers ───────────────────────────────────────── */
     @media (max-width: 640px) {
@@ -327,8 +308,7 @@
       /* Badge font size */
       .badge { font-size: 0.65rem; }
 
-      /* Wallet modal full width on mobile */
-      #walletModal > div { margin: 12px; width: calc(100vw - 24px) !important; max-width: 100% !important; }
+
 
       /* Chat bubble width on mobile */
       .chat-bubble-user, .chat-bubble-ai { max-width: 90% !important; }
@@ -448,20 +428,7 @@
         </div>
         <% } %>
 
-        <!-- Wallet -->
-        <div id="walletWrapper">
-          <% if (typeof walletAddress !== 'undefined' && walletAddress) { %>
-          <div class="wallet-btn connected" onclick="showWalletMenu()">
-            <span>🟢</span>
-            <span class="hidden sm:inline"><%= walletAddress.slice(0,6) %>...<%= walletAddress.slice(-4) %></span>
-          </div>
-          <% } else { %>
-          <button onclick="openWalletModal()" class="wallet-btn disconnected">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 12h2"/></svg>
-            <span class="hidden sm:inline">Connect</span>
-          </button>
-          <% } %>
-        </div>
+        <!-- Wallet connect removed -->
 
         <!-- Mobile menu toggle -->
         <button class="md:hidden w-9 h-9 rounded-lg flex items-center justify-center" style="border:1px solid var(--border);color:var(--text-muted);" onclick="toggleMobileMenu()">

@@ -14,7 +14,13 @@ async function fetchSuperteam() {
     const items = res.data?.listings || res.data?.data || res.data || [];
     console.log(`Superteam API: ${items.length} listings fetched`);
 
-    return items.map(item => ({
+    return items
+      .filter(item => {
+        if (item.deadline && new Date(item.deadline) < new Date()) return false;
+        if (item.status && !['open', 'active', 'live'].includes(String(item.status).toLowerCase())) return false;
+        return true;
+      })
+      .map(item => ({
       id: `st-${item.id || item.slug}`,
       title: item.title || item.name,
       description: item.description || item.shortDescription || '',
@@ -190,6 +196,12 @@ async function fetchAllOpportunities() {
 
   const mock = getMockData();
 
+  // If Superteam live API returned data, drop Superteam mock entries
+  const stLiveCount = stRes.status === 'fulfilled' ? (stRes.value?.length || 0) : 0;
+  const mockFiltered = stLiveCount > 0
+    ? mock.filter(o => o.source !== 'Superteam Earn')
+    : mock;
+
   // Filter out junk live ZA entries first
   const junkPatterns = /^(test|developer|community|design|marketing|development|bootspring|protocol updates|protocol infrastructure|graphic design|community\s*)$/i;
   const cleanLive = live.filter(op => {
@@ -202,11 +214,10 @@ async function fetchAllOpportunities() {
   });
 
   // Merge live + mock, deduplicating by title
-  // For duplicates: prefer whichever has more data (reward, description, tags)
-  const score = (op) => (op.reward !== 'TBD' ? 10 : 0) + (op.description && op.description.length > 30 ? 5 : 0) + (op.tags?.length > 0 ? 3 : 0) + (op.sourceUrl?.includes('/bounty/') ? 2 : 0);
+  const score = (op) => (op.reward !== 'TBD' ? 10 : 0) + (op.description && op.description.length > 30 ? 5 : 0) + (op.tags?.length > 0 ? 3 : 0) + (op.sourceUrl?.includes('/bounty/') || op.sourceUrl?.includes('/listing/') ? 2 : 0);
 
-  const seen = new Map(); // normalised title → best entry so far
-  [...cleanLive, ...mock].forEach(op => {
+  const seen = new Map();
+  [...cleanLive, ...mockFiltered].forEach(op => {
     const key = op.title.toLowerCase().trim().replace(/\s+/g, ' ');
     if (!seen.has(key)) {
       seen.set(key, op);
