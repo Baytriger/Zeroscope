@@ -3,7 +3,7 @@
 <main class="max-w-2xl mx-auto px-4 sm:px-6 py-10" style="position:relative;z-index:1;">
 
   <div class="mb-8">
-    <h1 style="font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.4rem);font-weight:800;color:var(--text);line-height:1.1;">
+    <h1 style="font-family:'Outfit',sans-serif;font-size:clamp(1.8rem,4vw,2.4rem);font-weight:800;color:var(--text);line-height:1.1;">
       Your <span style="color:var(--accent);">Profile</span>
     </h1>
     <p style="font-size:1rem;color:var(--text-muted);margin-top:6px;">
@@ -14,7 +14,7 @@
   <% if (!walletAddress && !loggedInUser) { %>
   <div class="card p-10 text-center fade-in">
     <div style="font-size:3rem;margin-bottom:16px;">🔌</div>
-    <h2 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:8px;">Sign In or Connect Wallet</h2>
+    <h2 style="font-family:'Outfit',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text);margin-bottom:8px;">Sign In or Connect Wallet</h2>
     <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:20px;">You need to be signed in to set up your profile.</p>
     <div class="flex gap-3 justify-center flex-wrap">
       <a href="/auth/login" class="btn-accent">Sign In</a>
@@ -31,7 +31,7 @@
         <%= loggedInUser.avatar ? '' : '👤' %>
       </div>
       <div>
-        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--text);"><%= loggedInUser.username %></div>
+        <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1.2rem;color:var(--text);"><%= loggedInUser.username %></div>
         <div style="font-size:0.85rem;color:var(--text-muted);"><%= loggedInUser.email %></div>
         <div class="flex items-center gap-2 mt-1">
           <span class="badge" style="background:rgba(var(--accent-rgb),0.15);color:var(--accent);border:1px solid rgba(var(--accent-rgb),0.3);font-size:0.7rem;">
@@ -49,12 +49,12 @@
 
   <!-- ── Skills & Personalization ── -->
   <div class="card p-6 sm:p-8 mb-6 fade-in">
-    <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--text);margin-bottom:4px;">Skills & Personalization</h2>
+    <h2 style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1.1rem;color:var(--text);margin-bottom:4px;">Skills & Personalization</h2>
     <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;">These are used to score and rank opportunities for you. The more accurate, the better your matches.</p>
 
     <!-- Experience Level -->
     <div class="mb-5">
-      <label style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.8rem;color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:10px;">Experience Level</label>
+      <label style="font-family:'Outfit',sans-serif;font-weight:600;font-size:0.8rem;color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:10px;">Experience Level</label>
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="levelPicker">
         <% ['beginner', 'intermediate', 'advanced', 'expert'].forEach(function(lvl) { %>
         <button
@@ -64,7 +64,7 @@
           style="border:1px solid <%= (loggedInUser.experienceLevel || 'intermediate') === lvl ? 'var(--accent)' : 'var(--border)' %>;
                  background:<%= (loggedInUser.experienceLevel || 'intermediate') === lvl ? 'rgba(var(--accent-rgb),0.12)' : 'var(--bg-card2)' %>;
                  color:<%= (loggedInUser.experienceLevel || 'intermediate') === lvl ? 'var(--accent)' : 'var(--text-muted)' %>;
-                 font-family:'Syne',sans-serif;">
+                 font-family:'Outfit',sans-serif;">
           <%= lvl === 'beginner' ? 'Beginner' : lvl === 'intermediate' ? 'Intermediate' : lvl === 'advanced' ? 'Advanced' : 'Expert' %>
           <%= lvl.charAt(0).toUpperCase() + lvl.slice(1) %>
         </button>
@@ -75,7 +75,7 @@
 
     <!-- Skills -->
     <div class="mb-5">
-      <label style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.8rem;color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:10px;">Your Skills</label>
+      <label style="font-family:'Outfit',sans-serif;font-weight:600;font-size:0.8rem;color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:10px;">Your Skills</label>
 
       <!-- Quick-pick skill chips -->
       <div class="flex flex-wrap gap-2 mb-3">
@@ -88,7 +88,7 @@
           style="border:1px solid <%= (loggedInUser.skills || []).map(s => s.toLowerCase()).includes(skill.toLowerCase()) ? 'var(--accent)' : 'var(--border)' %>;
                  background:<%= (loggedInUser.skills || []).map(s => s.toLowerCase()).includes(skill.toLowerCase()) ? 'rgba(var(--accent-rgb),0.15)' : 'var(--bg-card2)' %>;
                  color:<%= (loggedInUser.skills || []).map(s => s.toLowerCase()).includes(skill.toLowerCase()) ? 'var(--accent)' : 'var(--text-muted)' %>;
-                 font-family:'Syne',sans-serif;cursor:pointer;">
+                 font-family:'Outfit',sans-serif;cursor:pointer;">
           <%= skill %>
         </button>
         <% }) %>
@@ -98,7 +98,7 @@
       <div class="flex gap-2">
         <input type="text" id="customSkillInput" class="zs-input flex-1" placeholder="Add a custom skill..." maxlength="30"
           onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomSkill();}" />
-        <button onclick="addCustomSkill()" class="px-4 py-2 rounded-lg text-sm font-semibold" style="background:var(--accent);color:#000;font-family:'Syne',sans-serif;">Add</button>
+        <button onclick="addCustomSkill()" class="px-4 py-2 rounded-lg text-sm font-semibold" style="background:var(--accent);color:#000;font-family:'Outfit',sans-serif;">Add</button>
       </div>
 
       <!-- Selected skills display -->
@@ -111,14 +111,14 @@
     <button onclick="saveSkills()" class="btn-accent w-full" style="padding:14px;" id="skillsBtn">
       Save Skills & Personalize Dashboard
     </button>
-    <p id="skillsMsg" class="text-center hidden mt-3" style="font-size:0.85rem;font-family:'Syne',sans-serif;"></p>
+    <p id="skillsMsg" class="text-center hidden mt-3" style="font-size:0.85rem;font-family:'Outfit',sans-serif;"></p>
   </div>
   <% } %>
 
   <!-- ── Wallet Profile ── -->
   <% if (walletAddress) { %>
   <div class="card p-6 sm:p-8 mb-6 fade-in">
-    <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--text);margin-bottom:16px;">🔗 Wallet Profile</h2>
+    <h2 style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1.1rem;color:var(--text);margin-bottom:16px;">🔗 Wallet Profile</h2>
 
     <div class="flex flex-col items-center mb-6">
       <div id="avatarRing" onclick="document.getElementById('avatarInput').click()"
@@ -133,7 +133,7 @@
         </div>
         <div class="absolute inset-0 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
              style="background:rgba(0,0,0,0.55);">
-          <div style="text-align:center;"><div style="font-size:1.2rem;">📷</div><div style="font-size:0.6rem;color:#fff;font-family:'Syne',sans-serif;font-weight:700;">CHANGE</div></div>
+          <div style="text-align:center;"><div style="font-size:1.2rem;">📷</div><div style="font-size:0.6rem;color:#fff;font-family:'Outfit',sans-serif;font-weight:700;">CHANGE</div></div>
         </div>
       </div>
       <input type="file" id="avatarInput" accept="image/*" class="hidden" onchange="previewAvatar(event)" />
@@ -142,12 +142,12 @@
 
     <div class="flex flex-col gap-4">
       <div>
-        <label style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.8rem;color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:6px;">Display Name</label>
+        <label style="font-family:'Outfit',sans-serif;font-weight:600;font-size:0.8rem;color:var(--text-muted);letter-spacing:0.04em;text-transform:uppercase;display:block;margin-bottom:6px;">Display Name</label>
         <input type="text" id="displayName" class="zs-input" placeholder="e.g. CryptoBuilder99" maxlength="32"
           value="<%= (profile && profile.displayName) ? profile.displayName : '' %>" />
       </div>
       <button onclick="saveProfile()" class="btn-accent w-full" style="padding:14px;" id="saveBtn">Save Wallet Profile</button>
-      <p id="saveMsg" class="text-center hidden" style="font-size:0.85rem;font-family:'Syne',sans-serif;"></p>
+      <p id="saveMsg" class="text-center hidden" style="font-size:0.85rem;font-family:'Outfit',sans-serif;"></p>
     </div>
   </div>
   <% } %>
@@ -188,7 +188,7 @@ function renderSelectedSkills() {
   selectedSkills.forEach(skill => {
     const tag = document.createElement('span');
     tag.innerHTML = `${skill} <span onclick="removeSkill('${skill}')" style="cursor:pointer;opacity:0.6;margin-left:2px;">✕</span>`;
-    tag.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;background:rgba(var(--accent-rgb),0.15);color:var(--accent);border:1px solid rgba(var(--accent-rgb),0.3);font-size:0.75rem;font-family:\'Syne\',sans-serif;font-weight:600;';
+    tag.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;background:rgba(var(--accent-rgb),0.15);color:var(--accent);border:1px solid rgba(var(--accent-rgb),0.3);font-size:0.75rem;font-family:\'Outfit\',sans-serif;font-weight:600;';
     container.appendChild(tag);
   });
 }
@@ -336,3 +336,4 @@ renderSelectedSkills();
 </script>
 
 <%- include('partials/footer') %>
+

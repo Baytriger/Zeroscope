@@ -116,7 +116,6 @@ exports.getDashboard = async (req, res, next) => {
       savedBookmarks,
       notifications,
       unreadCount,
-      userProfile,
       loggedInUser,
       currentCategory: category,
       currentSearch: search,

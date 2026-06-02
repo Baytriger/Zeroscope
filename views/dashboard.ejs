@@ -6,7 +6,7 @@
   <div class="mb-8">
     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
       <div>
-        <h1 style="font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.5rem);font-weight:800;color:var(--text);line-height:1.1;">
+        <h1 style="font-family:'Outfit',sans-serif;font-size:clamp(1.8rem,4vw,2.5rem);font-weight:800;color:var(--text);line-height:1.1;">
           <% if (isPersonalized) { %>
             For <span style="color:var(--accent);"><%= username || 'You' %></span>
           <% } else { %>
@@ -28,7 +28,7 @@
       <div class="stat-card flex items-center gap-3" style="padding:10px 14px;">
         <div>
           <div style="font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">Your Reputation</div>
-          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--accent);" id="reputationDisplay">—</div>
+          <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1.3rem;color:var(--accent);" id="reputationDisplay">—</div>
         </div>
         <div id="tierDisplay" style="font-size:1.5rem;">Z</div>
       </div>
@@ -40,7 +40,7 @@
   <% if (recommended && recommended.length > 0) { %>
   <div class="mb-8">
     <div class="flex items-center gap-3 mb-4">
-      <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--text);">Recommended For You</h2>
+      <h2 style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1.1rem;color:var(--text);">Recommended For You</h2>
       <span class="badge" style="background:rgba(var(--accent-rgb),0.15);color:var(--accent);border:1px solid rgba(var(--accent-rgb),0.3);font-size:0.7rem;">Based on your skills</span>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
@@ -56,9 +56,9 @@
             </span>
           </div>
         </div>
-        <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--text);line-height:1.35;"><%= op.title %></h3>
+        <h3 style="font-family:'Outfit',sans-serif;font-weight:700;font-size:1rem;color:var(--text);line-height:1.35;"><%= op.title %></h3>
         <div class="flex items-center justify-between pt-2" style="border-top:1px solid var(--border);margin-top:auto;">
-          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;color:var(--accent);">
+          <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1.05rem;color:var(--accent);">
             <%= isNaN(parseFloat(op.reward)) ? op.reward : '$' + parseFloat(op.reward).toLocaleString() %>
             <span style="font-size:0.7rem;font-weight:600;color:var(--text-muted);"><%= op.rewardToken %></span>
           </div>
@@ -104,7 +104,7 @@
   <% if (hotOpportunities && hotOpportunities.length > 0) { %>
   <section class="mb-10">
     <div class="flex items-center gap-3 mb-4">
-      <h2 style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;color:var(--text);">Hot Right Now</h2>
+      <h2 style="font-family:'Outfit',sans-serif;font-size:1.3rem;font-weight:800;color:var(--text);">Hot Right Now</h2>
       <span class="badge badge-hot hot-badge">Trending</span>
     </div>
     <div class="flex gap-4 overflow-x-auto pb-3" style="scrollbar-width:thin;">
@@ -114,12 +114,12 @@
           <span class="badge badge-<%= op.category %>"><%= op.category %></span>
           <span class="badge badge-hot hot-badge">Hot</span>
         </div>
-        <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;color:var(--text);margin-bottom:8px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
+        <h3 style="font-family:'Outfit',sans-serif;font-weight:700;font-size:0.95rem;color:var(--text);margin-bottom:8px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">
           <%= op.title %>
         </h3>
         <div class="flex items-center justify-between mt-3">
           <div>
-            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--accent);">
+            <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1.1rem;color:var(--accent);">
               <%= isNaN(parseFloat(op.reward)) ? op.reward : op.rewardToken + ' ' + parseFloat(op.reward).toLocaleString() %>
               <span style="font-size:0.7rem;font-weight:600;color:var(--text-muted);"></span>
             </div>
@@ -207,7 +207,7 @@
       </div>
 
       <!-- Title -->
-      <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--text);line-height:1.35;">
+      <h3 style="font-family:'Outfit',sans-serif;font-weight:700;font-size:1rem;color:var(--text);line-height:1.35;">
         <%= op.title %>
       </h3>
 
@@ -230,7 +230,7 @@
       <!-- Bottom row -->
       <div class="flex flex-wrap items-center justify-between gap-2 pt-2" style="border-top:1px solid var(--border);margin-top:auto;">
         <div>
-          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;color:var(--accent);">
+          <div style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1.05rem;color:var(--accent);">
             <%= isNaN(parseFloat(op.reward)) ? op.reward : '$' + parseFloat(op.reward).toLocaleString() %>
             <span style="font-size:0.7rem;font-weight:600;color:var(--text-muted);"><%= op.rewardToken %></span>
           </div>
@@ -261,8 +261,8 @@
   <% } else { %>
   <!-- Empty state -->
   <div class="text-center py-20">
-    <div style="font-size:4rem;margin-bottom:16px;font-family:'Syne',sans-serif;font-weight:800;">?</div>
-    <h3 style="font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:700;color:var(--text);margin-bottom:8px;">No opportunities found</h3>
+    <div style="font-size:4rem;margin-bottom:16px;font-family:'Outfit',sans-serif;font-weight:800;">?</div>
+    <h3 style="font-family:'Outfit',sans-serif;font-size:1.3rem;font-weight:700;color:var(--text);margin-bottom:8px;">No opportunities found</h3>
     <p style="color:var(--text-muted);">Try a different search or category filter.</p>
     <a href="/" class="btn-accent inline-block mt-4">Clear Filters</a>
   </div>
@@ -296,3 +296,4 @@ fetch('/wallet/profile').then(r => r.json()).then(data => {
 </script>
 
 <%- include('partials/footer') %>
+

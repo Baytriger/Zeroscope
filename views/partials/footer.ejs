@@ -45,19 +45,13 @@ function readNotif(id) {
 
 
 
-function showWalletMenu() {
-  if (confirm('Disconnect your wallet?')) {
-    fetch('/wallet/disconnect', { method: 'POST' }).then(() => { showToast('Wallet disconnected', 'info'); setTimeout(() => location.reload(), 800); });
-  }
-}
-
 // ── Toast ─────────────────────────────────────────────────────────────────────
 function showToast(message, type = 'info') {
   const colors = { success: '#10b981', error: '#ef4444', info: '#22d3ee', warning: '#f59e0b' };
   const icons = { success: '✓', error: '✗', info: 'i', warning: '!' };
   const toast = document.createElement('div');
   toast.innerHTML = `<span>${icons[type]}</span><span style="font-size:0.875rem;">${message}</span>`;
-  toast.style.cssText = `display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;background:var(--bg-card);border:1px solid ${colors[type]}40;color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,0.4);animation:fadeIn 0.3s ease;font-family:'DM Sans',sans-serif;`;
+  toast.style.cssText = `display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:12px;background:var(--bg-card);border:1px solid ${colors[type]}40;color:var(--text);box-shadow:0 8px 24px rgba(0,0,0,0.4);animation:fadeIn 0.3s ease;font-family:'Inter',sans-serif;`;
   document.getElementById('toastContainer').appendChild(toast);
   setTimeout(() => toast.style.opacity = '0', 3500);
   setTimeout(() => toast.remove(), 4000);
@@ -213,14 +207,14 @@ document.addEventListener('keydown', function(e) {
 
 
 <!-- ═══ FOOTER ═══════════════════════════════════════════════════════════════ -->
-<footer style="border-top:1px solid var(--border);background:rgba(10,15,30,0.6);backdrop-filter:blur(10px);padding:24px 0;margin-top:48px;position:relative;z-index:1;">
+<footer style="border-top:1px solid var(--border);background:var(--bg-card);backdrop-filter:blur(10px);padding:24px 0;margin-top:48px;position:relative;z-index:1;">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
     <div class="flex items-center gap-3">
-      <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--accent);">ZEROSCOPE</span>
+      <span style="font-family:'Outfit',sans-serif;font-weight:800;font-size:1rem;color:var(--accent);">ZEROSCOPE</span>
       <span style="color:var(--border-hover);">—</span>
-      <span style="font-size:0.85rem;color:var(--text-muted);font-family:'DM Sans',sans-serif;">Built for the Zero Authority DAO Community</span>
+      <span style="font-size:0.85rem;color:var(--text-muted);font-family:'Inter',sans-serif;">Built for the Zero Authority DAO Community</span>
     </div>
-    <div style="font-size:0.8rem;color:var(--text-dim);font-family:'Syne',sans-serif;font-weight:600;letter-spacing:0.03em;">
+    <div style="font-size:0.8rem;color:var(--text-muted);font-family:'Outfit',sans-serif;font-weight:600;letter-spacing:0.03em;">
       by <span style="color:var(--accent);">ChainBuilders</span>
     </div>
   </div>
