@@ -1,148 +1,148 @@
 <%- include('partials/header') %>
 
 <main style="position:relative;z-index:1;">
-  
-  <!-- ── Hero Section ──────────────────────────────────────────────────── -->
-  <div style="min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px 20px;background:linear-gradient(135deg,rgba(34,211,238,0.08),rgba(139,92,246,0.06));">
-    
-    <div style="text-align:center;max-width:700px;">
-      
-      <!-- Logo -->
-      <div style="margin-bottom:40px;">
-        <img src="/logo.jpg" alt="ZEROSCOPE" style="width:80px;height:80px;border-radius:12px;box-shadow:0 8px 32px rgba(34,211,238,0.2);" />
-      </div>
+ 
+ <!-- Hero Section -->
+ <div style="min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px 20px;background:linear-gradient(135deg,rgba(34,211,238,0.08),rgba(139,92,246,0.06));">
+ 
+ <div style="text-align:center;max-width:700px;">
+ 
+ <!-- Logo -->
+ <div style="margin-bottom:40px;">
+ <img src="/logo.jpg" alt="ZEROSCOPE" style="width:80px;height:80px;border-radius:12px;box-shadow:0 8px 32px rgba(34,211,238,0.2);" />
+ </div>
 
-      <!-- Main Heading -->
-      <h1 style="font-family:'Outfit',sans-serif;font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:var(--text);line-height:1.1;margin-bottom:20px;">
-        Discover Web3 Opportunities
-      </h1>
+ <!-- Main Heading -->
+ <h1 style="font-family:'Outfit',sans-serif;font-size:clamp(2.5rem,6vw,4rem);font-weight:900;color:var(--text);line-height:1.1;margin-bottom:20px;">
+ Discover Web3 Opportunities
+ </h1>
 
-      <!-- Subheading -->
-      <p style="font-size:clamp(1rem,2vw,1.2rem);color:var(--text-muted);margin-bottom:40px;line-height:1.6;font-weight:400;">
-        ZEROSCOPE connects you with bounties, grants, jobs, and events from Zero Authority DAO and leading Web3 platforms. Get personalized recommendations based on your skills and find the perfect opportunity to grow your Web3 career.
-      </p>
+ <!-- Subheading -->
+ <p style="font-size:clamp(1rem,2vw,1.2rem);color:var(--text-muted);margin-bottom:40px;line-height:1.6;font-weight:400;">
+ ZEROSCOPE connects you with bounties, grants, jobs, and events from Zero Authority DAO and leading Web3 platforms. Get personalized recommendations based on your skills and find the perfect opportunity to grow your Web3 career.
+ </p>
 
-      <!-- Key Features Grid -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:60px;margin-top:50px;">
-        
-        <div style="padding:24px;background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);border-radius:12px;text-align:left;">
-          <div style="font-size:24px;margin-bottom:12px;">25+</div>
-          <div style="font-family:'Outfit',sans-serif;font-weight:600;color:var(--text-muted);font-size:0.95rem;">Active Opportunities</div>
-        </div>
+ <!-- Key Features Grid -->
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:20px;margin-bottom:60px;margin-top:50px;">
+ 
+ <div style="padding:24px;background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);border-radius:12px;text-align:left;">
+ <div style="font-size:24px;margin-bottom:12px;">25+</div>
+ <div style="font-family:'Outfit',sans-serif;font-weight:600;color:var(--text-muted);font-size:0.95rem;">Active Opportunities</div>
+ </div>
 
-        <div style="padding:24px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);border-radius:12px;text-align:left;">
-          <div style="font-size:24px;margin-bottom:12px;">Personalized</div>
-          <div style="font-family:'Outfit',sans-serif;font-weight:600;color:var(--text-muted);font-size:0.95rem;">Skill-Based Matching</div>
-        </div>
+ <div style="padding:24px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);border-radius:12px;text-align:left;">
+ <div style="font-size:24px;margin-bottom:12px;">Personalized</div>
+ <div style="font-family:'Outfit',sans-serif;font-weight:600;color:var(--text-muted);font-size:0.95rem;">Skill-Based Matching</div>
+ </div>
 
-        <div style="padding:24px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:12px;text-align:left;">
-          <div style="font-size:24px;margin-bottom:12px;">Verified</div>
-          <div style="font-family:'Outfit',sans-serif;font-weight:600;color:var(--text-muted);font-size:0.95rem;">Trusted Platforms</div>
-        </div>
+ <div style="padding:24px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);border-radius:12px;text-align:left;">
+ <div style="font-size:24px;margin-bottom:12px;">Verified</div>
+ <div style="font-family:'Outfit',sans-serif;font-weight:600;color:var(--text-muted);font-size:0.95rem;">Trusted Platforms</div>
+ </div>
 
-      </div>
+ </div>
 
-      <!-- CTA Buttons -->
-      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
-        <a href="/auth/register" style="padding:16px 40px;background:var(--accent);color:var(--bg);border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;text-decoration:none;transition:all 0.3s;display:inline-block;">
-          Create Account
-        </a>
-        <a href="/auth/login" style="padding:16px 40px;background:transparent;color:var(--accent);border:2px solid var(--accent);border-radius:8px;font-family:'Outfit',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;text-decoration:none;transition:all 0.3s;display:inline-block;">
-          Sign In
-        </a>
-      </div>
+ <!-- CTA Buttons -->
+ <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+ <a href="/auth/register" style="padding:16px 40px;background:var(--accent);color:var(--bg);border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;text-decoration:none;transition:all 0.3s;display:inline-block;">
+ Create Account
+ </a>
+ <a href="/auth/login" style="padding:16px 40px;background:transparent;color:var(--accent);border:2px solid var(--accent);border-radius:8px;font-family:'Outfit',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;text-decoration:none;transition:all 0.3s;display:inline-block;">
+ Sign In
+ </a>
+ </div>
 
-    </div>
+ </div>
 
-  </div>
+ </div>
 
-  <!-- ── Features Section ──────────────────────────────────────────────── -->
-  <div style="max-width:1200px;margin:100px auto;padding:60px 20px;">
+ <!-- Features Section -->
+ <div style="max-width:1200px;margin:100px auto;padding:60px 20px;">
 
-    <h2 style="font-family:'Outfit',sans-serif;font-size:clamp(2rem,5vw,2.5rem);font-weight:900;text-align:center;margin-bottom:60px;color:var(--text);">
-      Why Choose ZEROSCOPE?
-    </h2>
+ <h2 style="font-family:'Outfit',sans-serif;font-size:clamp(2rem,5vw,2.5rem);font-weight:900;text-align:center;margin-bottom:60px;color:var(--text);">
+ Why Choose ZEROSCOPE?
+ </h2>
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;">
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:40px;">
 
-      <!-- Feature 1 -->
-      <div style="text-align:center;">
-        <div style="font-size:3rem;margin-bottom:20px;height:80px;display:flex;align-items:center;justify-content:center;background:rgba(34,211,238,0.1);border-radius:12px;margin-left:auto;margin-right:auto;width:80px;">
-          <span style="font-family:'Outfit',sans-serif;font-weight:800;">⬇</span>
-        </div>
-        <h3 style="font-family:'Outfit',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:12px;color:var(--text);">Curated Recommendations</h3>
-        <p style="color:var(--text-muted);line-height:1.6;">Add your skills and get personalized opportunity recommendations ranked by compatibility with your profile.</p>
-      </div>
+ <!-- Feature 1 -->
+ <div style="text-align:center;">
+ <div style="font-size:3rem;margin-bottom:20px;height:80px;display:flex;align-items:center;justify-content:center;background:rgba(34,211,238,0.1);border-radius:12px;margin-left:auto;margin-right:auto;width:80px;">
+ <span style="font-family:'Outfit',sans-serif;font-weight:800;"></span>
+ </div>
+ <h3 style="font-family:'Outfit',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:12px;color:var(--text);">Curated Recommendations</h3>
+ <p style="color:var(--text-muted);line-height:1.6;">Add your skills and get personalized opportunity recommendations ranked by compatibility with your profile.</p>
+ </div>
 
-      <!-- Feature 2 -->
-      <div style="text-align:center;">
-        <div style="font-size:3rem;margin-bottom:20px;height:80px;display:flex;align-items:center;justify-content:center;background:rgba(139,92,246,0.1);border-radius:12px;margin-left:auto;margin-right:auto;width:80px;">
-          <span style="font-family:'Outfit',sans-serif;font-weight:800;">+</span>
-        </div>
-        <h3 style="font-family:'Outfit',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:12px;color:var(--text);">Track Your Progress</h3>
-        <p style="color:var(--text-muted);line-height:1.6;">Bookmark opportunities, update their status, and monitor your applications in one centralized dashboard.</p>
-      </div>
+ <!-- Feature 2 -->
+ <div style="text-align:center;">
+ <div style="font-size:3rem;margin-bottom:20px;height:80px;display:flex;align-items:center;justify-content:center;background:rgba(139,92,246,0.1);border-radius:12px;margin-left:auto;margin-right:auto;width:80px;">
+ <span style="font-family:'Outfit',sans-serif;font-weight:800;">+</span>
+ </div>
+ <h3 style="font-family:'Outfit',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:12px;color:var(--text);">Track Your Progress</h3>
+ <p style="color:var(--text-muted);line-height:1.6;">Bookmark opportunities, update their status, and monitor your applications in one centralized dashboard.</p>
+ </div>
 
-      <!-- Feature 3 -->
-      <div style="text-align:center;">
-        <div style="font-size:3rem;margin-bottom:20px;height:80px;display:flex;align-items:center;justify-content:center;background:rgba(16,185,129,0.1);border-radius:12px;margin-left:auto;margin-right:auto;width:80px;">
-          <span style="font-family:'Outfit',sans-serif;font-weight:800;">!</span>
-        </div>
-        <h3 style="font-family:'Outfit',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:12px;color:var(--text);">Real-Time Alerts</h3>
-        <p style="color:var(--text-muted);line-height:1.6;">Get deadline countdowns and notifications for opportunities that match your profile.</p>
-      </div>
+ <!-- Feature 3 -->
+ <div style="text-align:center;">
+ <div style="font-size:3rem;margin-bottom:20px;height:80px;display:flex;align-items:center;justify-content:center;background:rgba(16,185,129,0.1);border-radius:12px;margin-left:auto;margin-right:auto;width:80px;">
+ <span style="font-family:'Outfit',sans-serif;font-weight:800;">!</span>
+ </div>
+ <h3 style="font-family:'Outfit',sans-serif;font-size:1.3rem;font-weight:700;margin-bottom:12px;color:var(--text);">Real-Time Alerts</h3>
+ <p style="color:var(--text-muted);line-height:1.6;">Get deadline countdowns and notifications for opportunities that match your profile.</p>
+ </div>
 
-    </div>
+ </div>
 
-  </div>
+ </div>
 
-  <!-- ── Platforms Section ──────────────────────────────────────────────── -->
-  <div style="max-width:1200px;margin:100px auto;padding:60px 20px;text-align:center;">
+ <!-- Platforms Section -->
+ <div style="max-width:1200px;margin:100px auto;padding:60px 20px;text-align:center;">
 
-    <h2 style="font-family:'Outfit',sans-serif;font-size:clamp(2rem,5vw,2.5rem);font-weight:900;margin-bottom:50px;color:var(--text);">
-      Powered by Top Web3 Platforms
-    </h2>
+ <h2 style="font-family:'Outfit',sans-serif;font-size:clamp(2rem,5vw,2.5rem);font-weight:900;margin-bottom:50px;color:var(--text);">
+ Powered by Top Web3 Platforms
+ </h2>
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:30px;">
+ <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:30px;">
 
-      <!-- Zero Authority DAO -->
-      <div style="padding:30px;background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.2);border-radius:12px;">
-        <h3 style="font-family:'Outfit',sans-serif;font-weight:700;font-size:1.2rem;margin-bottom:12px;color:var(--text);">Zero Authority DAO</h3>
-        <p style="color:var(--text-muted);font-size:0.95rem;line-height:1.6;margin-bottom:16px;">
-          Bounties, grants, and events from the Zero Authority community. Build your reputation on Stacks.
-        </p>
-        <a href="/auth/register" style="color:var(--accent);font-weight:600;text-decoration:none;font-size:0.95rem;">Learn more</a>
-      </div>
+ <!-- Zero Authority DAO -->
+ <div style="padding:30px;background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.2);border-radius:12px;">
+ <h3 style="font-family:'Outfit',sans-serif;font-weight:700;font-size:1.2rem;margin-bottom:12px;color:var(--text);">Zero Authority DAO</h3>
+ <p style="color:var(--text-muted);font-size:0.95rem;line-height:1.6;margin-bottom:16px;">
+ Bounties, grants, and events from the Zero Authority community. Build your reputation on Stacks.
+ </p>
+ <a href="/auth/register" style="color:var(--accent);font-weight:600;text-decoration:none;font-size:0.95rem;">Learn more</a>
+ </div>
 
-      <!-- Superteam Earn -->
-      <div style="padding:30px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:12px;">
-        <h3 style="font-family:'Outfit',sans-serif;font-weight:700;font-size:1.2rem;margin-bottom:12px;color:var(--text);">Superteam Earn</h3>
-        <p style="color:var(--text-muted);font-size:0.95rem;line-height:1.6;margin-bottom:16px;">
-          Verified Solana ecosystem opportunities. Join thousands of creators, developers, and marketers.
-        </p>
-        <a href="/auth/register" style="color:var(--accent);font-weight:600;text-decoration:none;font-size:0.95rem;">Learn more</a>
-      </div>
+ <!-- Superteam Earn -->
+ <div style="padding:30px;background:rgba(139,92,246,0.08);border:1px solid rgba(139,92,246,0.2);border-radius:12px;">
+ <h3 style="font-family:'Outfit',sans-serif;font-weight:700;font-size:1.2rem;margin-bottom:12px;color:var(--text);">Superteam Earn</h3>
+ <p style="color:var(--text-muted);font-size:0.95rem;line-height:1.6;margin-bottom:16px;">
+ Verified Solana ecosystem opportunities. Join thousands of creators, developers, and marketers.
+ </p>
+ <a href="/auth/register" style="color:var(--accent);font-weight:600;text-decoration:none;font-size:0.95rem;">Learn more</a>
+ </div>
 
-    </div>
+ </div>
 
-  </div>
+ </div>
 
-  <!-- ── CTA Section ──────────────────────────────────────────────────── -->
-  <div style="max-width:700px;margin:100px auto;padding:60px 20px;text-align:center;background:linear-gradient(135deg,rgba(34,211,238,0.1),rgba(139,92,246,0.1));border-radius:16px;border:1px solid rgba(34,211,238,0.2);">
+ <!-- CTA Section -->
+ <div style="max-width:700px;margin:100px auto;padding:60px 20px;text-align:center;background:linear-gradient(135deg,rgba(34,211,238,0.1),rgba(139,92,246,0.1));border-radius:16px;border:1px solid rgba(34,211,238,0.2);">
 
-    <h2 style="font-family:'Outfit',sans-serif;font-size:clamp(1.8rem,4vw,2.2rem);font-weight:900;margin-bottom:20px;color:var(--text);">
-      Ready to Find Your Next Opportunity?
-    </h2>
+ <h2 style="font-family:'Outfit',sans-serif;font-size:clamp(1.8rem,4vw,2.2rem);font-weight:900;margin-bottom:20px;color:var(--text);">
+ Ready to Find Your Next Opportunity?
+ </h2>
 
-    <p style="color:var(--text-muted);margin-bottom:30px;font-size:1.05rem;line-height:1.6;font-family:'Inter',sans-serif;">
-      Sign up now and get personalized recommendations based on your Web3 skills and interests.
-    </p>
+ <p style="color:var(--text-muted);margin-bottom:30px;font-size:1.05rem;line-height:1.6;font-family:'Inter',sans-serif;">
+ Sign up now and get personalized recommendations based on your Web3 skills and interests.
+ </p>
 
-    <a href="/auth/register" style="padding:18px 50px;background:var(--accent);color:var(--bg);border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;text-decoration:none;transition:all 0.3s;display:inline-block;">
-      Get Started Now
-    </a>
+ <a href="/auth/register" style="padding:18px 50px;background:var(--accent);color:var(--bg);border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;text-decoration:none;transition:all 0.3s;display:inline-block;">
+ Get Started Now
+ </a>
 
-  </div>
+ </div>
 
 </main>
 

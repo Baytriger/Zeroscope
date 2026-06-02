@@ -3,76 +3,92 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title><%= title || 'ZEROSCOPE' %></title>
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!--
+    NOTE on the browser security warning:
+    Some browsers flag pages using cdn.tailwindcss.com when the site is
+    already flagged for other reasons (domain reputation). Fix: deploy on
+    a clean domain (not localhost via ngrok/tunnel), get it verified in
+    Google Search Console, and request review at
+    https://safebrowsing.google.com/safebrowsing/report_error/
+    The Tailwind CDN itself is safe — the warning is about the domain.
+  -->
 
-  <!-- Professional Fonts: Outfit (headings) + Inter (body) -->
+  <!-- Tailwind CSS CDN (v3 stable) -->
+  <script src="https://cdn.tailwindcss.com/3.4.1"></script>
+
+  <!-- Professional Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet" />
 
+  <!-- Tailwind config MUST come before any usage -->
   <script>
     tailwind.config = {
-      darkMode: ['attribute', '[data-theme="dark"]'],
+      darkMode: ['selector', '[data-theme="dark"]'],
       theme: {
         extend: {
           fontFamily: {
             heading: ['Outfit', 'sans-serif'],
-            body: ['Inter', 'sans-serif'],
-          },
-          colors: {
-            cyan: { 400: '#22d3ee', 500: '#06b6d4' },
+            body:    ['Inter', 'sans-serif'],
           }
         }
       }
-    }
+    };
+  </script>
+
+  <!-- Apply saved theme BEFORE paint to prevent flash -->
+  <script>
+    (function() {
+      var t = localStorage.getItem('zs-theme') || 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
   </script>
 
   <style>
-    /* ── CSS Custom Properties ───────────────────────────────────────────── */
-    :root {
-      --bg:           #0a0f1e;
-      --bg-card:      #0f1629;
-      --bg-card2:     #141d35;
-      --border:       rgba(34, 211, 238, 0.15);
-      --border-hover: rgba(34, 211, 238, 0.4);
-      --text:         #e2e8f0;
-      --text-muted:   #94a3b8;
-      --text-dim:     #64748b;
-      --accent:       #22d3ee;
-      --accent-rgb:   34,211,238;
-      --accent-glow:  rgba(34, 211, 238, 0.25);
-      --accent2:      #0ea5e9;
-      --hot:          #f59e0b;
-      --success:      #10b981;
-      --danger:       #ef4444;
-      --warning:      #f59e0b;
-      --purple:       #8b5cf6;
-    }
+    /* ── CSS Custom Properties ─────────────────────────────────────────── */
+    :root,
     [data-theme="light"] {
       --bg:           #f0f4ff;
       --bg-card:      #ffffff;
       --bg-card2:     #f8faff;
-      --border:       rgba(6, 182, 212, 0.2);
-      --border-hover: rgba(6, 182, 212, 0.5);
+      --border:       rgba(6, 182, 212, 0.18);
+      --border-hover: rgba(6, 182, 212, 0.45);
       --text:         #0f172a;
       --text-muted:   #475569;
       --text-dim:     #94a3b8;
       --accent:       #0891b2;
       --accent-rgb:   8,145,178;
-      --accent-glow:  rgba(8, 145, 178, 0.15);
+      --accent-glow:  rgba(8,145,178,0.12);
       --accent2:      #0369a1;
-      --hot:          #d97706;
       --success:      #059669;
       --danger:       #dc2626;
       --warning:      #d97706;
       --purple:       #7c3aed;
     }
+    [data-theme="dark"] {
+      --bg:           #0a0f1e;
+      --bg-card:      #0f1629;
+      --bg-card2:     #141d35;
+      --border:       rgba(34,211,238,0.14);
+      --border-hover: rgba(34,211,238,0.38);
+      --text:         #e2e8f0;
+      --text-muted:   #94a3b8;
+      --text-dim:     #64748b;
+      --accent:       #22d3ee;
+      --accent-rgb:   34,211,238;
+      --accent-glow:  rgba(34,211,238,0.22);
+      --accent2:      #0ea5e9;
+      --success:      #10b981;
+      --danger:       #ef4444;
+      --warning:      #f59e0b;
+      --purple:       #8b5cf6;
+    }
 
-    /* ── Base ────────────────────────────────────────────────────────────── */
-    * { box-sizing: border-box; }
+    /* ── Base ──────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     html, body { overflow-x: hidden; }
     body {
@@ -82,33 +98,31 @@
       color: var(--text);
       min-height: 100vh;
       line-height: 1.6;
-      transition: background 0.3s, color 0.3s;
+      transition: background 0.25s ease, color 0.25s ease;
     }
-    h1,h2,h3,h4,h5,h6 { font-family: 'Outfit', sans-serif; }
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Outfit', sans-serif;
+      line-height: 1.2;
+    }
 
-    /* ── Background Pattern ──────────────────────────────────────────────── */
+    /* ── Subtle background gradient ───────────────────────────────────── */
     body::before {
       content: '';
       position: fixed;
       inset: 0;
       background:
-        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(34,211,238,0.08) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(139,92,246,0.06) 0%, transparent 60%);
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(var(--accent-rgb),0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(124,58,237,0.04) 0%, transparent 60%);
       pointer-events: none;
       z-index: 0;
     }
-    [data-theme="light"] body::before {
-      background:
-        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(8,145,178,0.06) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(124,58,237,0.04) 0%, transparent 60%);
-    }
 
-    /* ── Cards ───────────────────────────────────────────────────────────── */
+    /* ── Cards ─────────────────────────────────────────────────────────── */
     .card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 16px;
-      transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      transition: border-color 0.2s, transform 0.18s, box-shadow 0.2s;
     }
     .card:hover {
       border-color: var(--border-hover);
@@ -116,67 +130,78 @@
       box-shadow: 0 8px 32px var(--accent-glow);
     }
 
-    /* ── Navbar ──────────────────────────────────────────────────────────── */
+    /* ── Navbar ────────────────────────────────────────────────────────── */
     .navbar {
-      background: rgba(10, 15, 30, 0.85);
+      background: rgba(240,244,255,0.92);
       backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
       z-index: 100;
+      transition: background 0.25s;
     }
-    [data-theme="light"] .navbar {
-      background: rgba(240, 244, 255, 0.9);
+    [data-theme="dark"] .navbar {
+      background: rgba(10,15,30,0.88);
     }
 
-    /* ── Buttons ─────────────────────────────────────────────────────────── */
+    /* ── Buttons ───────────────────────────────────────────────────────── */
     .btn-accent {
       background: linear-gradient(135deg, var(--accent), var(--accent2));
       color: #fff;
       font-family: 'Outfit', sans-serif;
-      font-weight: 600;
+      font-weight: 700;
       border: none;
       border-radius: 10px;
-      padding: 10px 20px;
+      padding: 10px 22px;
       cursor: pointer;
-      transition: opacity 0.2s, transform 0.15s;
+      transition: opacity 0.18s, transform 0.15s;
       font-size: 0.9rem;
+      display: inline-block;
+      text-decoration: none;
+      line-height: 1.4;
     }
-    .btn-accent:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-accent:hover { opacity: 0.86; transform: translateY(-1px); }
     .btn-outline {
       background: transparent;
       border: 1px solid var(--border-hover);
       color: var(--accent);
       font-family: 'Outfit', sans-serif;
-      font-weight: 600;
+      font-weight: 700;
       border-radius: 10px;
-      padding: 10px 20px;
+      padding: 10px 22px;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.18s, transform 0.15s;
       font-size: 0.9rem;
+      display: inline-block;
+      text-decoration: none;
     }
-    .btn-outline:hover { background: var(--accent-glow); }
+    .btn-outline:hover { background: var(--accent-glow); transform: translateY(-1px); }
 
-    /* ── Badges / Pills ──────────────────────────────────────────────────── */
+    /* ── Badges ────────────────────────────────────────────────────────── */
     .badge {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
       padding: 3px 10px;
       border-radius: 99px;
-      font-size: 0.72rem;
-      font-weight: 600;
+      font-size: 0.7rem;
+      font-weight: 700;
       font-family: 'Outfit', sans-serif;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
     }
-    .badge-bounty  { background: rgba(34,211,238,0.12); color: #22d3ee; border: 1px solid rgba(34,211,238,0.3); }
-    .badge-grant   { background: rgba(16,185,129,0.12); color: #10b981; border: 1px solid rgba(16,185,129,0.3); }
-    .badge-job     { background: rgba(139,92,246,0.12); color: #8b5cf6; border: 1px solid rgba(139,92,246,0.3); }
-    .badge-event   { background: rgba(245,158,11,0.12); color: #f59e0b; border: 1px solid rgba(245,158,11,0.3); }
-    .badge-hot     { background: rgba(239,68,68,0.12);  color: #ef4444; border: 1px solid rgba(239,68,68,0.3); }
+    .badge-bounty { background:rgba(34,211,238,0.1);  color:#0891b2; border:1px solid rgba(34,211,238,0.3); }
+    .badge-grant  { background:rgba(16,185,129,0.1);  color:#059669; border:1px solid rgba(16,185,129,0.3); }
+    .badge-job    { background:rgba(139,92,246,0.1);  color:#7c3aed; border:1px solid rgba(139,92,246,0.3); }
+    .badge-event  { background:rgba(245,158,11,0.1);  color:#d97706; border:1px solid rgba(245,158,11,0.3); }
+    .badge-hot    { background:rgba(220,38,38,0.08);  color:#dc2626; border:1px solid rgba(220,38,38,0.25); }
+    [data-theme="dark"] .badge-bounty { color:#22d3ee; }
+    [data-theme="dark"] .badge-grant  { color:#10b981; }
+    [data-theme="dark"] .badge-job    { color:#8b5cf6; }
+    [data-theme="dark"] .badge-event  { color:#f59e0b; }
+    [data-theme="dark"] .badge-hot    { color:#ef4444; }
 
-    /* ── Category Filter Tabs ────────────────────────────────────────────── */
+    /* ── Filter tabs ───────────────────────────────────────────────────── */
     .filter-tab {
       padding: 8px 18px;
       border-radius: 10px;
@@ -187,7 +212,7 @@
       border: 1px solid var(--border);
       color: var(--text-muted);
       background: transparent;
-      transition: all 0.2s;
+      transition: all 0.18s;
       white-space: nowrap;
     }
     .filter-tab:hover, .filter-tab.active {
@@ -196,64 +221,59 @@
       background: var(--accent-glow);
     }
 
-    /* ── Stat Cards ──────────────────────────────────────────────────────── */
+    /* ── Stat cards ────────────────────────────────────────────────────── */
     .stat-card {
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 20px 24px;
+      padding: 18px 20px;
       transition: border-color 0.2s;
     }
     .stat-card:hover { border-color: var(--border-hover); }
     .stat-value {
       font-family: 'Outfit', sans-serif;
-      font-size: 2rem;
+      font-size: 1.9rem;
       font-weight: 800;
       color: var(--accent);
       line-height: 1;
     }
     .stat-label {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: var(--text-muted);
-      font-weight: 500;
-      margin-top: 4px;
-      letter-spacing: 0.04em;
+      font-weight: 600;
+      margin-top: 5px;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
     }
 
-    /* ── Countdown ───────────────────────────────────────────────────────── */
-    .countdown { font-family: 'Outfit', sans-serif; font-size: 0.8rem; font-weight: 700; }
-    .countdown.urgent { color: var(--danger); animation: pulse 1.5s infinite; }
-    .countdown.warning { color: var(--warning); }
-    .countdown.ok { color: var(--success); }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
-
-    /* ── Hot glow ────────────────────────────────────────────────────────── */
-    .hot-badge {
-      animation: hotpulse 2s infinite;
+    /* ── Countdown ─────────────────────────────────────────────────────── */
+    .countdown {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
     }
-    @keyframes hotpulse { 0%,100%{box-shadow:0 0 0 rgba(239,68,68,0)} 50%{box-shadow:0 0 12px rgba(239,68,68,0.5)} }
+    .countdown.urgent  { color: var(--danger);  animation: pulse 1.5s infinite; }
+    .countdown.warning { color: var(--warning); }
+    .countdown.ok      { color: var(--success); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.55} }
 
-    /* ── Notification Panel ──────────────────────────────────────────────── */
+    /* ── Notification panel ────────────────────────────────────────────── */
     .notif-panel {
       position: absolute;
-      top: calc(100% + 12px);
+      top: calc(100% + 10px);
       right: 0;
       width: 360px;
       max-width: calc(100vw - 32px);
       background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 16px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
       z-index: 200;
       overflow: hidden;
     }
 
-    /* ── AI Chat ─────────────────────────────────────────────────────────── */
-    .chat-bubble-user { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; border-radius: 16px 16px 4px 16px; }
-    .chat-bubble-ai   { background: var(--bg-card2); border: 1px solid var(--border); border-radius: 16px 16px 16px 4px; }
-
-    /* ── Input ───────────────────────────────────────────────────────────── */
+    /* ── Inputs ────────────────────────────────────────────────────────── */
     .zs-input {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -269,7 +289,7 @@
     .zs-input:focus { border-color: var(--accent); }
     .zs-input::placeholder { color: var(--text-dim); }
 
-    /* ── Select ──────────────────────────────────────────────────────────── */
+    /* ── Select ────────────────────────────────────────────────────────── */
     .zs-select {
       background: var(--bg-card);
       border: 1px solid var(--border);
@@ -280,102 +300,91 @@
       font-size: 0.9rem;
       outline: none;
       cursor: pointer;
+      transition: border-color 0.2s;
     }
     .zs-select:focus { border-color: var(--accent); }
 
-    /* ── Scrollbar ───────────────────────────────────────────────────────── */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    /* ── Scrollbar ─────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 3px; }
 
+    /* ── Fade-in animation ─────────────────────────────────────────────── */
+    .fade-in { animation: fadeIn 0.35s ease both; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
 
-    
-    
-    
-
-    /* ── Mobile responsive helpers ───────────────────────────────────────── */
+    /* ── Mobile ────────────────────────────────────────────────────────── */
     @media (max-width: 640px) {
-      .stat-value { font-size: 1.4rem; }
-      .stat-card  { padding: 10px 12px; overflow: hidden; }
+      .stat-value  { font-size: 1.4rem; }
+      .stat-card   { padding: 10px 12px; }
       .notif-panel { width: calc(100vw - 24px); right: -60px; }
-
-      /* Cards full width on mobile */
-      .card { border-radius: 14px; }
-
-      /* Filter tabs scrollable */
-      .filter-tab { font-size: 0.78rem; padding: 7px 14px; }
-
-      /* Badge font size */
-      .badge { font-size: 0.65rem; }
-
-
-
-      /* Chat bubble width on mobile */
-      .chat-bubble-user, .chat-bubble-ai { max-width: 90% !important; }
-
-      /* Footer text wrap */
+      .filter-tab  { font-size: 0.78rem; padding: 7px 12px; }
+      .badge       { font-size: 0.62rem; }
+      .zs-input, .zs-select { font-size: 16px !important; } /* prevents iOS zoom */
       footer .flex { flex-direction: column; text-align: center; gap: 8px; }
-
-      /* Auth pages */
-      .auth-card { padding: 24px 20px !important; }
-
-      /* Inputs full width */
-      .zs-input, .zs-select { font-size: 16px !important; width: 100%; box-sizing: border-box; } /* prevents iOS zoom */
     }
-
     @media (max-width: 400px) {
       .stat-value { font-size: 1.2rem; }
       h1 { font-size: 1.6rem !important; }
     }
-
-    /* ── Fade in animation ───────────────────────────────────────────────── */
-    .fade-in { animation: fadeIn 0.4s ease both; }
-    @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: none; } }
   </style>
 </head>
 <body>
 
-<!-- ═══ NAVBAR ═══════════════════════════════════════════════════════════════ -->
+<!-- ═══ NAVBAR ════════════════════════════════════════════════════════════ -->
 <nav class="navbar">
   <div class="max-w-7xl mx-auto px-4 sm:px-6">
     <div class="flex items-center justify-between h-16">
 
       <!-- Logo -->
-      <a href="/" class="flex items-center gap-3 flex-shrink-0">
-        <img src="/logo.jpg" alt="ZEROSCOPE" class="h-9 w-9 rounded-lg object-cover" />
-        <span style="font-family:'Outfit',sans-serif;font-size:1.3rem;font-weight:800;color:var(--accent);letter-spacing:-0.02em;">
-          ZEROSCOPE
-        </span>
+      <a href="/" class="flex items-center gap-3 flex-shrink-0" style="text-decoration:none;">
+        <img src="/logo.jpg" alt="ZEROSCOPE" class="h-9 w-9 rounded-lg object-cover" style="box-shadow:0 2px 12px var(--accent-glow);" />
+        <span style="font-family:'Outfit',sans-serif;font-size:1.25rem;font-weight:900;color:var(--accent);letter-spacing:-0.02em;">ZEROSCOPE</span>
       </a>
 
-      <!-- Desktop Nav Links -->
+      <!-- Desktop Nav -->
       <div class="hidden md:flex items-center gap-1">
-        <a href="/" class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors <%= currentPath === '/' ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] hover:text-[var(--text)]' %>" style="font-family:'Outfit',sans-serif;">Opportunities</a>
-        <a href="/bookmarks" class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors <%= currentPath === '/bookmarks' ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] hover:text-[var(--text)]' %>" style="font-family:'Outfit',sans-serif;">Bookmarks</a>
-        <a href="/profile" class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors <%= currentPath === '/profile' ? 'text-[var(--accent)]' : 'text-[var(--text-muted)] hover:text-[var(--text)]' %>" style="font-family:'Outfit',sans-serif;">Profile</a>
+        <% if (typeof userId !== 'undefined' && userId) { %>
+        <a href="/" class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors" style="font-family:'Outfit',sans-serif;color:<%= currentPath === '/' ? 'var(--accent)' : 'var(--text-muted)' %>;">Opportunities</a>
+        <a href="/bookmarks" class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors" style="font-family:'Outfit',sans-serif;color:<%= currentPath === '/bookmarks' ? 'var(--accent)' : 'var(--text-muted)' %>;">Bookmarks</a>
+        <a href="/profile" class="px-4 py-2 rounded-lg text-sm font-semibold transition-colors" style="font-family:'Outfit',sans-serif;color:<%= currentPath === '/profile' ? 'var(--accent)' : 'var(--text-muted)' %>;">Profile</a>
+        <% } %>
       </div>
 
-      <!-- Right actions -->
+      <!-- Right Actions -->
       <div class="flex items-center gap-2 sm:gap-3">
 
-        <!-- X (Twitter) Social -->
-        <a href="https://x.com/ZeroScopeHQ" target="_blank" rel="noopener noreferrer" class="hidden sm:flex w-9 h-9 rounded-lg items-center justify-center transition-colors hover:bg-[var(--accent-glow)]" style="border:1px solid var(--border);color:var(--text-muted);" title="Follow @ZeroScopeHQ on X" aria-label="X / Twitter">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.763l7.659-8.741L1.928 2.25h6.927l4.346 5.739zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        <!-- X / Twitter -->
+        <a href="https://x.com/ZeroScopeHQ" target="_blank" rel="noopener noreferrer"
+           class="hidden sm:flex w-9 h-9 rounded-lg items-center justify-center transition-colors"
+           style="border:1px solid var(--border);color:var(--text-muted);" title="Follow on X"
+           onmouseover="this.style.background='var(--accent-glow)'" onmouseout="this.style.background='transparent'">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.763l7.659-8.741L1.928 2.25h6.927l4.346 5.739zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         </a>
 
         <!-- Theme Toggle -->
-        <button onclick="toggleTheme()" class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors hover:bg-[var(--accent-glow)]" style="border:1px solid var(--border);color:var(--text-muted);" title="Toggle theme" aria-label="Toggle theme">
-          <span id="themeIcon">◐</span>
+        <button onclick="toggleTheme()" id="themeToggleBtn"
+          class="w-9 h-9 rounded-lg flex items-center justify-center transition-colors"
+          style="border:1px solid var(--border);color:var(--text-muted);background:transparent;cursor:pointer;font-family:'Outfit',sans-serif;font-size:0.7rem;font-weight:700;"
+          title="Toggle theme"
+          onmouseover="this.style.background='var(--accent-glow)'" onmouseout="this.style.background='transparent'">
+          <span id="themeIcon">Light</span>
         </button>
 
-        <!-- Notifications -->
+        <!-- Notifications (only when logged in) -->
+        <% if (typeof userId !== 'undefined' && userId) { %>
         <div class="relative" id="notifWrapper">
-          <button onclick="toggleNotifications()" class="w-9 h-9 rounded-lg flex items-center justify-center relative transition-colors hover:bg-[var(--accent-glow)]" style="border:1px solid var(--border);color:var(--text-muted);" aria-label="Notifications">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <button onclick="toggleNotifications()"
+            class="w-9 h-9 rounded-lg flex items-center justify-center relative transition-colors"
+            style="border:1px solid var(--border);color:var(--text-muted);background:transparent;cursor:pointer;"
+            onmouseover="this.style.background='var(--accent-glow)'" onmouseout="this.style.background='transparent'"
+            aria-label="Notifications">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
             </svg>
             <% if (typeof unreadCount !== 'undefined' && unreadCount > 0) { %>
-            <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full text-white text-xs flex items-center justify-center font-bold" style="background:var(--danger);font-family:'Outfit',sans-serif;font-size:0.6rem;">
+            <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full text-white flex items-center justify-center font-bold"
+              style="background:var(--danger);font-family:'Outfit',sans-serif;font-size:0.58rem;">
               <%= unreadCount > 9 ? '9+' : unreadCount %>
             </span>
             <% } %>
@@ -384,54 +393,61 @@
           <!-- Notification Panel -->
           <div id="notifPanel" class="notif-panel hidden">
             <div class="flex items-center justify-between px-4 py-3" style="border-bottom:1px solid var(--border);">
-              <span style="font-family:'Outfit',sans-serif;font-weight:700;color:var(--text);">Notifications</span>
-              <button onclick="markAllRead()" class="text-xs font-semibold" style="color:var(--accent);font-family:'Outfit',sans-serif;">Mark all read</button>
+              <span style="font-family:'Outfit',sans-serif;font-weight:700;font-size:0.9rem;color:var(--text);">Notifications</span>
+              <button onclick="markAllRead()" style="font-size:0.75rem;font-weight:700;color:var(--accent);font-family:'Outfit',sans-serif;background:none;border:none;cursor:pointer;">Mark all read</button>
             </div>
-            <div class="overflow-y-auto" style="max-height:360px;">
+            <div class="overflow-y-auto" style="max-height:340px;">
               <% if (typeof notifications !== 'undefined' && notifications.length > 0) { %>
                 <% notifications.slice(0,10).forEach(function(n) { %>
-                <div class="flex gap-3 px-4 py-3 cursor-pointer transition-colors hover:bg-[var(--bg-card2)] <%= !n.read ? 'border-l-2' : '' %>" style="<%= !n.read ? 'border-left-color:var(--accent)' : '' %>;border-bottom:1px solid var(--border);" onclick="readNotif('<%= n._id %>')">
-                  <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-base" style="background:var(--bg-card2);">
-                    <%= n.type === 'deadline_critical' ? '!' : n.type === 'deadline_warning' ? '◆' : n.type === 'won' ? '+' : n.type === 'new_grant' ? '$' : n.type === 'new_job' ? '◎' : '★' %>
+                <div onclick="readNotif('<%= n._id %>')"
+                  style="display:flex;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);<%= !n.read ? 'border-left:2px solid var(--accent);' : '' %>;transition:background 0.15s;"
+                  onmouseover="this.style.background='var(--bg-card2)'" onmouseout="this.style.background='transparent'">
+                  <div style="flex-shrink:0;width:32px;height:32px;border-radius:50%;background:var(--bg-card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:800;font-size:0.7rem;color:var(--accent);">
+                    <%= n.type === 'deadline_critical' ? '!' : n.type === 'won' ? 'W' : n.type === 'new_grant' ? 'G' : n.type === 'new_job' ? 'J' : 'N' %>
                   </div>
-                  <div class="flex-1 min-w-0">
-                    <p style="font-family:'Outfit',sans-serif;font-weight:600;font-size:0.8rem;color:var(--text);" class="truncate"><%= n.title %></p>
-                    <p style="font-size:0.75rem;color:var(--text-muted);" class="mt-0.5 line-clamp-2"><%= n.message %></p>
-                    <p style="font-size:0.7rem;color:var(--text-dim);" class="mt-1"><%= new Date(n.createdAt).toLocaleDateString() %></p>
+                  <div style="flex:1;min-width:0;">
+                    <p style="font-family:'Outfit',sans-serif;font-weight:700;font-size:0.8rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><%= n.title %></p>
+                    <p style="font-size:0.74rem;color:var(--text-muted);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;"><%= n.message %></p>
+                    <p style="font-size:0.68rem;color:var(--text-dim);margin-top:4px;"><%= new Date(n.createdAt).toLocaleDateString() %></p>
                   </div>
                 </div>
                 <% }) %>
               <% } else { %>
-              <div class="px-4 py-10 text-center" style="color:var(--text-muted);">
-                <div class="text-3xl mb-2">🔔</div>
-                <p style="font-family:'Outfit',sans-serif;font-size:0.85rem;">No notifications yet</p>
+              <div style="padding:40px 16px;text-align:center;color:var(--text-muted);">
+                <p style="font-family:'Outfit',sans-serif;font-size:0.875rem;margin-top:8px;">No notifications yet</p>
               </div>
               <% } %>
             </div>
           </div>
         </div>
+        <% } %>
 
         <!-- Auth -->
         <% if (typeof userId !== 'undefined' && userId) { %>
         <div class="flex items-center gap-2">
-          <span style="font-size:0.8rem;color:var(--text-muted);font-family:'Outfit',sans-serif;font-weight:600;" class="hidden sm:inline">👤 <%= username %></span>
+          <span class="hidden sm:inline" style="font-size:0.8rem;color:var(--text-muted);font-family:'Outfit',sans-serif;font-weight:600;"><%= username %></span>
           <form action="/auth/logout" method="POST" style="display:inline;">
-            <button type="submit" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors" style="border:1px solid var(--border);color:var(--text-muted);background:transparent;font-family:'Outfit',sans-serif;cursor:pointer;" onmouseover="this.style.borderColor='var(--danger)';this.style.color='var(--danger)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
+            <button type="submit"
+              style="padding:6px 14px;border-radius:8px;font-size:0.78rem;font-weight:700;font-family:'Outfit',sans-serif;border:1px solid var(--border);color:var(--text-muted);background:transparent;cursor:pointer;transition:all 0.2s;"
+              onmouseover="this.style.borderColor='var(--danger)';this.style.color='var(--danger)'"
+              onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">
               Sign Out
             </button>
           </form>
         </div>
         <% } else { %>
         <div class="flex items-center gap-2">
-          <a href="/auth/login" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors hidden sm:inline-block" style="border:1px solid var(--border);color:var(--text-muted);font-family:'Outfit',sans-serif;" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">Sign In</a>
-          <a href="/auth/register" class="btn-accent px-3 py-1.5 text-xs hidden sm:inline-block" style="border-radius:8px;">Register</a>
+          <a href="/auth/login"
+            class="hidden sm:inline-block"
+            style="padding:6px 14px;border-radius:8px;font-size:0.78rem;font-weight:700;font-family:'Outfit',sans-serif;border:1px solid var(--border);color:var(--text-muted);text-decoration:none;transition:all 0.2s;"
+            onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'"
+            onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'">Sign In</a>
+          <a href="/auth/register" class="btn-accent" style="padding:7px 16px;font-size:0.8rem;border-radius:8px;">Register</a>
         </div>
         <% } %>
 
-        <!-- Wallet connect removed -->
-
-        <!-- Mobile menu toggle -->
-        <button class="md:hidden w-9 h-9 rounded-lg flex items-center justify-center" style="border:1px solid var(--border);color:var(--text-muted);" onclick="toggleMobileMenu()">
+        <!-- Mobile menu -->
+        <button class="md:hidden w-9 h-9 rounded-lg flex items-center justify-center" style="border:1px solid var(--border);color:var(--text-muted);background:transparent;cursor:pointer;" onclick="toggleMobileMenu()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
       </div>
@@ -440,30 +456,26 @@
     <!-- Mobile Menu -->
     <div id="mobileMenu" class="md:hidden hidden pb-3 pt-1" style="border-top:1px solid var(--border);">
       <div class="flex flex-col gap-1 mt-2">
-        <a href="/" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Outfit',sans-serif;color:var(--text-muted);">🏠 Opportunities</a>
-        <a href="/bookmarks" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Outfit',sans-serif;color:var(--text-muted);">Bookmarks</a>
-        <a href="/profile" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Outfit',sans-serif;color:var(--text-muted);">👤 Profile</a>
-
-        <a href="https://x.com/ZeroScopeHQ" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Outfit',sans-serif;color:var(--text-muted);">🐦 Follow @ZeroScopeHQ</a>
-
-        <div style="height:1px;background:var(--border);margin:6px 0;"></div>
-
         <% if (typeof userId !== 'undefined' && userId) { %>
-        <div class="px-4 py-2 flex items-center justify-between">
-          <span style="font-size:0.875rem;color:var(--text-muted);font-family:'Outfit',sans-serif;">👤 <%= username %></span>
+        <a href="/" style="padding:10px 16px;border-radius:8px;font-size:0.9rem;font-weight:600;font-family:'Outfit',sans-serif;color:var(--text-muted);text-decoration:none;">Opportunities</a>
+        <a href="/bookmarks" style="padding:10px 16px;border-radius:8px;font-size:0.9rem;font-weight:600;font-family:'Outfit',sans-serif;color:var(--text-muted);text-decoration:none;">Bookmarks</a>
+        <a href="/profile" style="padding:10px 16px;border-radius:8px;font-size:0.9rem;font-weight:600;font-family:'Outfit',sans-serif;color:var(--text-muted);text-decoration:none;">Profile</a>
+        <div style="height:1px;background:var(--border);margin:6px 0;"></div>
+        <div style="padding:8px 16px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:0.875rem;color:var(--text-muted);font-family:'Outfit',sans-serif;"><%= username %></span>
           <form action="/auth/logout" method="POST">
-            <button type="submit" style="font-size:0.8rem;color:#f87171;font-family:'Outfit',sans-serif;font-weight:600;background:none;border:none;cursor:pointer;">Sign Out</button>
+            <button type="submit" style="font-size:0.82rem;color:var(--danger);font-family:'Outfit',sans-serif;font-weight:700;background:none;border:none;cursor:pointer;">Sign Out</button>
           </form>
         </div>
         <% } else { %>
-        <a href="/auth/login" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Outfit',sans-serif;color:var(--text-muted);">🔑 Sign In</a>
-        <a href="/auth/register" class="px-4 py-2.5 rounded-lg text-sm font-semibold" style="font-family:'Outfit',sans-serif;color:var(--accent);">✨ Create Account</a>
+        <a href="/auth/login" style="padding:10px 16px;border-radius:8px;font-size:0.9rem;font-weight:600;font-family:'Outfit',sans-serif;color:var(--text-muted);text-decoration:none;">Sign In</a>
+        <a href="/auth/register" style="padding:10px 16px;border-radius:8px;font-size:0.9rem;font-weight:600;font-family:'Outfit',sans-serif;color:var(--accent);text-decoration:none;">Create Account</a>
         <% } %>
+        <a href="https://x.com/ZeroScopeHQ" target="_blank" rel="noopener noreferrer" style="padding:10px 16px;border-radius:8px;font-size:0.9rem;font-weight:600;font-family:'Outfit',sans-serif;color:var(--text-muted);text-decoration:none;">Follow on X</a>
       </div>
     </div>
   </div>
 </nav>
 
 <!-- Toast Container -->
-<div id="toastContainer" class="fixed bottom-6 right-4 z-50 flex flex-col gap-2" style="max-width:min(320px,calc(100vw - 2rem));"></div>
-
+<div id="toastContainer" style="position:fixed;bottom:24px;right:16px;z-index:500;display:flex;flex-direction:column;gap:8px;max-width:min(320px,calc(100vw - 2rem));"></div>
